@@ -75,15 +75,7 @@ export async function googleAuthCallback(req, res) {
 
     res.cookie("token", token);
 
-    return res.status(200).json({
-      message: "User logged in successfully",
-      user: {
-        id: isUserAlreadyExists._id,
-        email: isUserAlreadyExists.email,
-        fullname: isUserAlreadyExists.fullname,
-        role: isUserAlreadyExists.role,
-      },
-    });
+    return res.redirect("http://localhost:5173");
   }
 
   const newUser = await userModel.create({
@@ -129,4 +121,33 @@ export async function googleAuthCallback(req, res) {
       role: newUser.role,
     },
   });
+}
+
+export async function login(req, res) {
+  const { email, password } = req.body;
+
+  const user = await userModel.findOne({ email });
+
+  if (!user) {
+    return res.status(400).json({ message: "Invalid email or password" });
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    return res.status(400).json({ message: "Invalid email or password" });
+  }
+
+  const token = jwt.sign(
+    {
+      id: user._id,
+      role: user.role,
+    },
+    config.JWT_SECRET,
+    { expiresIn: "2d" },
+  );
+
+  res.cookie("token", token);
+
+  res.redirect("http://localhost:5173");
 }
