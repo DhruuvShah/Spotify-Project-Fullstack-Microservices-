@@ -9,6 +9,7 @@ export async function register(req, res) {
     email,
     password,
     fullname: { firstName, lastName },
+    role = "user",
   } = req.body;
 
   const isUserAlreadyExists = await userModel.findOne({ email });
@@ -26,12 +27,14 @@ export async function register(req, res) {
       firstName,
       lastName,
     },
+    role,
   });
 
   const token = jwt.sign(
     {
       id: user._id,
       role: user.role,
+      fullname: user.fullname,
     },
     config.JWT_SECRET,
     { expiresIn: "2d" },
@@ -68,12 +71,17 @@ export async function googleAuthCallback(req, res) {
       {
         id: isUserAlreadyExists._id,
         role: isUserAlreadyExists.role,
+        fullname: isUserAlreadyExists.fullname,
       },
       config.JWT_SECRET,
       { expiresIn: "2d" },
     );
 
     res.cookie("token", token);
+
+    if (isUserAlreadyExists.role === "artist") {
+      return res.redirect("http://localhost:5173/artist/dashboard");
+    }
 
     return res.redirect("http://localhost:5173");
   }
@@ -98,6 +106,7 @@ export async function googleAuthCallback(req, res) {
     {
       id: newUser._id,
       role: newUser.role,
+      fullname: newUser.fullname,
     },
     config.JWT_SECRET,
     { expiresIn: "2d" },
@@ -142,6 +151,7 @@ export async function login(req, res) {
     {
       id: user._id,
       role: user.role,
+      fullname: user.fullname,
     },
     config.JWT_SECRET,
     { expiresIn: "2d" },
@@ -149,5 +159,14 @@ export async function login(req, res) {
 
   res.cookie("token", token);
 
-  res.redirect("http://localhost:5173");
+  // res.redirect("http://localhost:5173");
+  res.status(200).json({
+    message: "Login successful",
+    user: {
+      id: user._id,
+      email: user.email,
+      fullname: user.fullname,
+      role: user.role,
+    },
+  });
 }
