@@ -37,6 +37,12 @@ router.post(
 );
 
 router.get(
+  "/playlist/artist",
+  authMiddleware.authArtistMiddleware,
+  musicController.getArtistPlaylists,
+);
+
+router.get(
   "/playlists",
   authMiddleware.authUserMiddleware,
   musicController.getPlaylists,

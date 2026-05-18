@@ -172,3 +172,38 @@ export async function getPlaylistById(req, res) {
     return res.status(500).json({ message: "Error fetching playlist" });
   }
 }
+
+export async function getArtistPlaylists(req, res) {
+  try {
+    const playlistDocs = await playlistModel.find({ artistId: req.user.id });
+
+    const playlists = await Promise.all(
+      playlistDocs.map(async (pl) => {
+        const musics = await Promise.all(
+          pl.musics.map(async (musicId) => {
+            const m = await musicModel.findById(musicId);
+            if (!m) return null;
+            return {
+              id: m._id,
+              title: m.title,
+              artist: m.artist,
+              coverImageUrl: m.coverImageUrl,
+              musicUrl: m.musicUrl,
+            };
+          })
+        );
+        return {
+          id: pl._id,
+          title: pl.title,
+          artist: pl.artist,
+          musics: musics.filter(Boolean),
+        };
+      })
+    );
+
+    return res.status(200).json({ playlists });
+  } catch (error) {
+    console.error("Error fetching artist playlists:", error);
+    return res.status(500).json({ message: "Error fetching artist playlists" });
+  }
+}

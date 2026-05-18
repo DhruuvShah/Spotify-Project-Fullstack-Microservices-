@@ -4,6 +4,8 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import ArtistDashboard from './pages/artist/ArtistDashboard'
+import UploadMusic from './pages/artist/UploadMusic'
+import MusicPlayer from './pages/MusicPlayer'
 
 function WithNavbar() {
   return (
@@ -22,8 +24,10 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/music/:id" element={<MusicPlayer />} />
         </Route>
         <Route path="/artist/dashboard" element={<ArtistDashboard />} />
+        <Route path="/artist/dashboard/upload-music" element={<UploadMusic />} />
       </Routes>
     </BrowserRouter>
   )
