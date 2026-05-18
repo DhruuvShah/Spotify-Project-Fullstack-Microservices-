@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { usePlayer } from "../context/PlayerContext";
 import "./MusicPlayer.css";
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
@@ -15,57 +16,55 @@ function fmt(s) {
 export default function MusicPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const audioRef = useRef(null);
   const seekBarRef = useRef(null);
 
-  const [music, setMusic] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const {
+    currentTrack,
+    playing,
+    currentTime,
+    duration,
+    volume,
+    muted,
+    likedIds,
+    audioRef,
+    togglePlay,
+    next,
+    prev,
+    seek,
+    changeVolume,
+    toggleMute,
+    toggleLike,
+    playTrack,
+  } = usePlayer();
+
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const [playing, setPlaying] = useState(false);
-  const [current, setCurrent] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
-  const [speed, setSpeed] = useState(1);
   const [imgErr, setImgErr] = useState(false);
+  const [speed, setSpeed] = useState(1);
 
+  // Reset image error and speed when track changes
   useEffect(() => {
+    setImgErr(false);
+    setSpeed(1);
+  }, [id]);
+
+  // If this track isn't already loaded in the player, fetch and start it
+  useEffect(() => {
+    if (currentTrack?.id === id) return;
+    setLoading(true);
+    setError("");
     axios
       .get(`http://localhost:3002/api/music/get-details/${id}`, {
         withCredentials: true,
       })
-      .then((res) => setMusic(res.data.music))
+      .then((res) => playTrack(res.data.music))
       .catch(() => setError("Track not found."))
       .finally(() => setLoading(false));
   }, [id]);
 
-  function togglePlay() {
-    const audio = audioRef.current;
-    if (!audio) return;
-    if (playing) {
-      audio.pause();
-      setPlaying(false);
-    } else {
-      audio.play();
-      setPlaying(true);
-    }
-  }
-
-  function handleLoadedMetadata() {
-    const audio = audioRef.current;
-    setDuration(audio.duration);
-    audio.volume = volume;
-    audio.playbackRate = speed;
-  }
-
-  function handleTimeUpdate() {
-    setCurrent(audioRef.current.currentTime);
-  }
-
-  function handleEnded() {
-    setPlaying(false);
-    setCurrent(0);
+  function changeSpeed(s) {
+    setSpeed(s);
+    if (audioRef.current) audioRef.current.playbackRate = s;
   }
 
   function handleSeekClick(e) {
@@ -73,40 +72,17 @@ export default function MusicPlayer() {
     if (!bar || !duration) return;
     const rect = bar.getBoundingClientRect();
     const ratio = Math.min(Math.max((e.clientX - rect.left) / rect.width, 0), 1);
-    const newTime = ratio * duration;
-    audioRef.current.currentTime = newTime;
-    setCurrent(newTime);
+    seek(ratio * duration);
   }
 
   function handleVolumeChange(e) {
-    const val = parseFloat(e.target.value);
-    setVolume(val);
-    setMuted(val === 0);
-    audioRef.current.volume = val;
+    changeVolume(parseFloat(e.target.value));
   }
 
-  function toggleMute() {
-    const audio = audioRef.current;
-    const next = !muted;
-    setMuted(next);
-    audio.volume = next ? 0 : volume;
-  }
-
-  function changeSpeed(s) {
-    setSpeed(s);
-    audioRef.current.playbackRate = s;
-  }
-
-  function skip(delta) {
-    const audio = audioRef.current;
-    if (!audio) return;
-    const newTime = Math.min(Math.max(0, audio.currentTime + delta), duration);
-    audio.currentTime = newTime;
-    setCurrent(newTime);
-  }
-
-  const pct = duration ? (current / duration) * 100 : 0;
+  const track = currentTrack;
+  const pct = duration ? (currentTime / duration) * 100 : 0;
   const volPct = `${(muted ? 0 : volume) * 100}%`;
+  const isLiked = track ? likedIds.has(track.id) : false;
 
   if (loading) {
     return (
@@ -117,7 +93,7 @@ export default function MusicPlayer() {
     );
   }
 
-  if (error || !music) {
+  if (error || !track) {
     return (
       <div className="mp-state mp-error">
         <p>{error || "Track not found."}</p>
@@ -128,14 +104,6 @@ export default function MusicPlayer() {
 
   return (
     <div className="mp-root">
-      <audio
-        ref={audioRef}
-        src={music.musicUrl}
-        onTimeUpdate={handleTimeUpdate}
-        onLoadedMetadata={handleLoadedMetadata}
-        onEnded={handleEnded}
-      />
-
       <div className="mp-card">
         {/* Back */}
         <button className="mp-back-btn" onClick={() => navigate(-1)}>
@@ -144,10 +112,10 @@ export default function MusicPlayer() {
 
         {/* Cover */}
         <div className={`mp-cover-wrap ${playing ? "mp-cover-playing" : ""}`}>
-          {!imgErr && music.coverImageUrl ? (
+          {!imgErr && track.coverImageUrl ? (
             <img
-              src={music.coverImageUrl}
-              alt={music.title}
+              src={track.coverImageUrl}
+              alt={track.title}
               className="mp-cover"
               onError={() => setImgErr(true)}
             />
@@ -158,10 +126,19 @@ export default function MusicPlayer() {
           )}
         </div>
 
-        {/* Info */}
+        {/* Info + like */}
         <div className="mp-info">
-          <h1 className="mp-title">{music.title}</h1>
-          <p className="mp-artist">{music.artist}</p>
+          <div className="mp-info-text">
+            <h1 className="mp-title">{track.title}</h1>
+            <p className="mp-artist">{track.artist}</p>
+          </div>
+          <button
+            className={`mp-like-btn${isLiked ? " liked" : ""}`}
+            onClick={() => toggleLike(track.id)}
+            title={isLiked ? "Unlike" : "Like"}
+          >
+            <HeartIcon filled={isLiked} />
+          </button>
         </div>
 
         {/* Seek Bar */}
@@ -177,27 +154,31 @@ export default function MusicPlayer() {
             <div className="mp-seek-thumb" style={{ left: `${pct}%` }} />
           </div>
           <div className="mp-time-row">
-            <span>{fmt(current)}</span>
+            <span>{fmt(currentTime)}</span>
             <span>{fmt(duration)}</span>
           </div>
         </div>
 
         {/* Main Controls */}
         <div className="mp-controls">
-          <button className="mp-ctrl-btn" onClick={() => skip(-10)} title="Back 10s">
-            <Replay10Icon />
+          <button className="mp-ctrl-btn" onClick={prev} title="Previous">
+            <PrevIcon />
           </button>
           <button className="mp-play-btn" onClick={togglePlay}>
             {playing ? <PauseIcon /> : <PlayIcon />}
           </button>
-          <button className="mp-ctrl-btn" onClick={() => skip(10)} title="Forward 10s">
-            <Forward10Icon />
+          <button className="mp-ctrl-btn" onClick={next} title="Next">
+            <NextIcon />
           </button>
         </div>
 
         {/* Volume */}
         <div className="mp-volume-row">
-          <button className="mp-vol-icon-btn" onClick={toggleMute} title={muted ? "Unmute" : "Mute"}>
+          <button
+            className="mp-vol-icon-btn"
+            onClick={toggleMute}
+            title={muted ? "Unmute" : "Mute"}
+          >
             {muted || volume === 0 ? (
               <MuteIcon />
             ) : volume < 0.5 ? (
@@ -238,7 +219,18 @@ export default function MusicPlayer() {
   );
 }
 
-/* ── Icons ──────────────────────────────────────────────────── */
+/* ── Icons ── */
+function HeartIcon({ filled }) {
+  return filled ? (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  ) : (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  );
+}
 function PlayIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -246,7 +238,6 @@ function PlayIcon() {
     </svg>
   );
 }
-
 function PauseIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -255,25 +246,22 @@ function PauseIcon() {
     </svg>
   );
 }
-
-function Replay10Icon() {
+function PrevIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" />
-      <text x="12" y="15.5" textAnchor="middle" fontSize="5.5" fontFamily="sans-serif" fontWeight="700" fill="currentColor">10</text>
+      <polygon points="19 20 9 12 19 4 19 20" />
+      <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
-
-function Forward10Icon() {
+function NextIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z" />
-      <text x="12" y="15.5" textAnchor="middle" fontSize="5.5" fontFamily="sans-serif" fontWeight="700" fill="currentColor">10</text>
+      <polygon points="5 4 15 12 5 20 5 4" />
+      <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }
-
 function VolHighIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -283,7 +271,6 @@ function VolHighIcon() {
     </svg>
   );
 }
-
 function VolLowIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -292,7 +279,6 @@ function VolLowIcon() {
     </svg>
   );
 }
-
 function MuteIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -302,7 +288,6 @@ function MuteIcon() {
     </svg>
   );
 }
-
 function MusicNoteIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -312,7 +297,6 @@ function MusicNoteIcon() {
     </svg>
   );
 }
-
 function ChevronDownIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

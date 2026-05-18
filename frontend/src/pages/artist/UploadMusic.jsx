@@ -217,22 +217,6 @@ export default function UploadMusic() {
 
   return (
     <div className="up-root">
-      {/* Header */}
-      <header className="up-header">
-        <div className="up-header-left">
-          <div className="up-logo">
-            <SpotifyIcon />
-          </div>
-          <span className="up-header-title">Artist Studio</span>
-        </div>
-        <button
-          className="up-back-btn"
-          onClick={() => navigate("/artist/dashboard")}
-        >
-          <ArrowLeftIcon /> Dashboard
-        </button>
-      </header>
-
       <main className="up-main">
         <div className="up-card">
           <div className="up-card-header">

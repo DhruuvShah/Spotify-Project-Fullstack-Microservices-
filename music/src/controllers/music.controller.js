@@ -1,6 +1,7 @@
 import { uploadFile } from "../services/storage.service.js";
 import musicModel from "../models/music.Model.js";
 import playlistModel from "../models/playlist.model.js";
+import likeModel from "../models/like.model.js";
 
 export async function uploadMusic(req, res) {
   const musicFile = req.files["musicFile"]?.[0];
@@ -164,9 +165,7 @@ export async function getPlaylistById(req, res) {
       musics,
     };
 
-    playlistDocs.musics = musics;
-
-    return res.status(200).json({ playlist: playlistDocs });
+    return res.status(200).json({ playlist });
   } catch (error) {
     console.error("Error fetching playlist:", error);
     return res.status(500).json({ message: "Error fetching playlist" });
@@ -205,5 +204,61 @@ export async function getArtistPlaylists(req, res) {
   } catch (error) {
     console.error("Error fetching artist playlists:", error);
     return res.status(500).json({ message: "Error fetching artist playlists" });
+  }
+}
+
+export async function searchMusics(req, res) {
+  const { q = "" } = req.query;
+  if (!q.trim()) return res.status(200).json({ musics: [] });
+
+  try {
+    const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(escaped, "i");
+    const docs = await musicModel
+      .find({ $or: [{ title: regex }, { artist: regex }] })
+      .limit(20);
+
+    const musics = docs.map((m) => ({
+      id: m._id,
+      title: m.title,
+      artist: m.artist,
+      musicUrl: m.musicUrl,
+      coverImageUrl: m.coverImageUrl,
+    }));
+    return res.status(200).json({ musics });
+  } catch (error) {
+    console.error("Error searching music:", error);
+    return res.status(500).json({ message: "Error searching music" });
+  }
+}
+
+export async function likeMusic(req, res) {
+  const { id } = req.params;
+  try {
+    await likeModel.create({ userId: req.user.id, musicId: id });
+    return res.status(201).json({ message: "Liked" });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).json({ message: "Already liked" });
+    return res.status(500).json({ message: "Error liking music" });
+  }
+}
+
+export async function unlikeMusic(req, res) {
+  const { id } = req.params;
+  try {
+    await likeModel.deleteOne({ userId: req.user.id, musicId: id });
+    return res.status(200).json({ message: "Unliked" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error unliking music" });
+  }
+}
+
+export async function getLikedMusicIds(req, res) {
+  try {
+    const likes = await likeModel.find({ userId: req.user.id }, { musicId: 1 });
+    const likedIds = likes.map((l) => l.musicId.toString());
+    return res.status(200).json({ likedIds });
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching likes" });
   }
 }

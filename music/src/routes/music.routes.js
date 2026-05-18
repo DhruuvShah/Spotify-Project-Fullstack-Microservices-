@@ -54,4 +54,28 @@ router.get(
   musicController.getPlaylistById,
 );
 
+router.get(
+  "/search",
+  authMiddleware.authUserMiddleware,
+  musicController.searchMusics,
+);
+
+router.get(
+  "/likes",
+  authMiddleware.authUserMiddleware,
+  musicController.getLikedMusicIds,
+);
+
+router.post(
+  "/like/:id",
+  authMiddleware.authUserMiddleware,
+  musicController.likeMusic,
+);
+
+router.delete(
+  "/like/:id",
+  authMiddleware.authUserMiddleware,
+  musicController.unlikeMusic,
+);
+
 export default router;

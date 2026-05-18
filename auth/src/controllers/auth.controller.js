@@ -132,6 +132,34 @@ export async function googleAuthCallback(req, res) {
   });
 }
 
+export async function me(req, res) {
+  try {
+    const token = req.cookies?.token;
+    if (!token) return res.status(401).json({ message: "Not authenticated" });
+
+    const decoded = jwt.verify(token, config.JWT_SECRET);
+    const user = await userModel.findById(decoded.id).select("-password");
+
+    if (!user) return res.status(401).json({ message: "User not found" });
+
+    return res.status(200).json({
+      user: {
+        id: user._id,
+        email: user.email,
+        fullname: user.fullname,
+        role: user.role,
+      },
+    });
+  } catch {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+}
+
+export function logout(req, res) {
+  res.clearCookie("token", { path: "/" });
+  return res.status(200).json({ message: "Logged out successfully" });
+}
+
 export async function login(req, res) {
   const { email, password } = req.body;
 
@@ -159,7 +187,7 @@ export async function login(req, res) {
 
   res.cookie("token", token);
 
-  // res.redirect("http://localhost:5173");
+  res.redirect("http://localhost:5173");
   res.status(200).json({
     message: "Login successful",
     user: {

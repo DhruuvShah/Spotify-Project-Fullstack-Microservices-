@@ -1,0 +1,186 @@
+/* ── Search Page ───────────────────────────────────────────── */
+.sr-root {
+  min-height: 100svh;
+  background: var(--color-bg-base);
+  padding-bottom: calc(var(--player-bar-height) + var(--space-8));
+}
+
+.sr-header {
+  padding: var(--space-8) clamp(var(--space-4), 5vw, var(--space-10)) var(--space-6);
+}
+
+.sr-input-wrap {
+  position: relative;
+  max-width: 560px;
+  display: flex;
+  align-items: center;
+}
+
+.sr-input-wrap > svg {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+.sr-input {
+  width: 100%;
+  background: var(--color-surface-100);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  color: #fff;
+  font-size: var(--text-base);
+  padding: 12px 44px 12px 44px;
+  outline: none;
+  transition: border-color var(--duration-base), background var(--duration-base);
+}
+.sr-input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--color-surface-200);
+}
+.sr-input::placeholder { color: rgba(255, 255, 255, 0.35); }
+
+.sr-clear-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  transition: color var(--duration-base);
+}
+.sr-clear-btn svg { width: 16px; height: 16px; }
+.sr-clear-btn:hover { color: #fff; }
+
+/* Body */
+.sr-body {
+  padding: 0 clamp(var(--space-4), 5vw, var(--space-10));
+}
+
+.sr-hint,
+.sr-loading,
+.sr-empty {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.45);
+  padding: var(--space-6) 0;
+}
+
+.sr-results-title {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: var(--font-normal);
+  margin-bottom: var(--space-4);
+}
+
+/* Track list */
+.sr-list {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.sr-row {
+  display: grid;
+  grid-template-columns: 32px 46px 1fr 36px 36px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  cursor: pointer;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: background var(--duration-base);
+}
+.sr-row:last-child { border-bottom: none; }
+.sr-row:hover { background: rgba(255, 255, 255, 0.05); }
+.sr-row:hover .sr-play-btn { opacity: 1; }
+
+.sr-num {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.4);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.sr-cover {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  display: block;
+}
+.sr-cover-fallback {
+  background: rgba(255, 255, 255, 0.07);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sr-cover-fallback svg { width: 18px; height: 18px; color: rgba(255, 255, 255, 0.25); }
+
+.sr-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sr-title {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sr-artist {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sr-like-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.35);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--duration-base), transform var(--duration-fast);
+}
+.sr-like-btn svg { width: 16px; height: 16px; }
+.sr-like-btn:hover { color: #fff; transform: scale(1.1); }
+.sr-like-btn.liked { color: var(--color-brand); }
+.sr-like-btn.liked:hover { color: var(--color-brand-hover); }
+
+.sr-play-btn {
+  background: var(--color-brand);
+  border: none;
+  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  opacity: 0;
+  transition: opacity var(--duration-base), background var(--duration-base), transform var(--duration-fast);
+}
+.sr-play-btn svg { width: 13px; height: 13px; fill: currentColor; margin-left: 1px; }
+.sr-play-btn:hover { background: var(--color-brand-hover); transform: scale(1.08); }
+
+@media (max-width: 600px) {
+  .sr-row { grid-template-columns: 28px 42px 1fr 32px; }
+  .sr-play-btn { display: none; }
+}

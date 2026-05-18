@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import "./Home.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useOutletContext } from "react-router-dom";
+import { usePlayer } from "../context/PlayerContext";
 
 const PLAYLIST_GRADIENTS = [
   "linear-gradient(135deg, #1db954, #0a5c2b)",
@@ -15,12 +16,18 @@ const PLAYLIST_GRADIENTS = [
 ];
 
 /* ── Music Card ─────────────────────────────────────────────── */
-function MusicCard({ music }) {
-  const navigate = useNavigate();
+function MusicCard({ music, allMusics, socketRef }) {
+  const { playTrack, likedIds, toggleLike } = usePlayer();
   const [imgErr, setImgErr] = useState(false);
 
+  function handlePlay(e) {
+    e?.stopPropagation();
+    socketRef.current?.emit("play", { musicId: music.id });
+    playTrack(music, allMusics);
+  }
+
   return (
-    <div className="home-music-card" onClick={() => navigate(`/music/${music.id}`)}>
+    <div className="home-music-card" onClick={handlePlay}>
       <div className="hmc-cover-wrap">
         {!imgErr && music.coverImageUrl ? (
           <img
@@ -34,30 +41,39 @@ function MusicCard({ music }) {
             <MusicNoteIcon />
           </div>
         )}
-        <a
-          href={music.musicUrl}
-          className="hmc-play-btn"
-          title="Play"
-          onClick={(e) => e.stopPropagation()}
-        >
+        <button className="hmc-play-btn" title="Play" onClick={handlePlay}>
           <PlayIcon />
-        </a>
+        </button>
       </div>
       <div className="hmc-info">
         <span className="hmc-title">{music.title}</span>
         <span className="hmc-artist">{music.artist}</span>
       </div>
+      <button
+        className={`hmc-like-btn${likedIds.has(music.id) ? " liked" : ""}`}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleLike(music.id);
+        }}
+        title={likedIds.has(music.id) ? "Unlike" : "Like"}
+      >
+        <HeartIcon filled={likedIds.has(music.id)} />
+      </button>
     </div>
   );
 }
 
 /* ── Playlist Card ──────────────────────────────────────────── */
 function PlaylistCard({ playlist, index }) {
+  const navigate = useNavigate();
   const gradient = PLAYLIST_GRADIENTS[index % PLAYLIST_GRADIENTS.length];
   const count = Array.isArray(playlist.musics) ? playlist.musics.length : 0;
 
   return (
-    <div className="home-playlist-card">
+    <div
+      className="home-playlist-card"
+      onClick={() => navigate(`/playlist/${playlist.id ?? playlist._id}`)}
+    >
       <div className="hpc-cover" style={{ background: gradient }}>
         <PlaylistIcon />
         <div className="hpc-play-btn">
@@ -76,49 +92,9 @@ function PlaylistCard({ playlist, index }) {
 
 /* ── Main Component ─────────────────────────────────────────── */
 export default function Home() {
-  const navigate = useNavigate();
-  const [musics, setMusics] = useState([
-    {
-      id: "1",
-      title: "Sample Track 1",
-      artist: "Artist A",
-      coverImageUrl: "",
-      musicUrl: "#",
-    },
-    {
-      id: "2",
-      title: "Sample Track 2",
-      artist: "Artist B",
-      coverImageUrl: "",
-      musicUrl: "#",
-    },
-    {
-      id: "3",
-      title: "Sample Track 3",
-      artist: "Artist C",
-      coverImageUrl: "",
-      musicUrl: "#",
-    },
-    {
-      id: "4",
-      title: "Sample Track 4",
-      artist: "Artist D",
-      coverImageUrl: "",
-      musicUrl: "#",
-    },
-    {
-      id: "5",
-      title: "Sample Track 5",
-      artist: "Artist E",
-      coverImageUrl: "",
-      musicUrl: "#",
-    },
-  ]);
-  const [playlists, setPlaylists] = useState([
-    { _id: "1", title: "Sample Playlist 1", artist: "Curator A", musics: [] },
-    { _id: "2", title: "Sample Playlist 2", artist: "Curator B", musics: [] },
-    { _id: "3", title: "Sample Playlist 3", artist: "Curator C", musics: [] },
-  ]);
+  const { socketRef } = useOutletContext();
+  const [musics, setMusics] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const hour = new Date().getHours();
@@ -129,7 +105,7 @@ export default function Home() {
     Promise.all([
       axios
         .get("http://localhost:3002/api/music/", { withCredentials: true })
-        .then((res) => {
+        .then((res) =>
           setMusics(
             res.data.musics.map((m) => ({
               id: m.id ?? m._id,
@@ -137,29 +113,28 @@ export default function Home() {
               artist: m.artist,
               coverImageUrl: m.coverImageUrl,
               musicUrl: m.musicUrl,
-            })),
-          );
-        }),
+            }))
+          )
+        ),
       axios
         .get("http://localhost:3002/api/music/playlists", {
           withCredentials: true,
         })
-        .then((res) => {
+        .then((res) =>
           setPlaylists(
             res.data.playlists.map((p) => ({
               id: p._id,
               title: p.title,
               artist: p.artist,
               musics: p.musics,
-            })),
-          );
-        }),
+            }))
+          )
+        ),
     ]).finally(() => setLoading(false));
   }, []);
 
   return (
     <div className="home-root">
-      {/* Greeting */}
       <div className="home-greeting">
         <h1 className="home-greeting-text">{greeting}</h1>
       </div>
@@ -175,7 +150,12 @@ export default function Home() {
           ) : (
             <div className="home-music-scroll">
               {musics.map((music, i) => (
-                <MusicCard key={music.id ?? i} music={music} />
+                <MusicCard
+                  key={music.id ?? i}
+                  music={music}
+                  allMusics={musics}
+                  socketRef={socketRef}
+                />
               ))}
             </div>
           )}
@@ -191,7 +171,7 @@ export default function Home() {
           ) : (
             <div className="home-playlist-grid">
               {playlists.map((pl, i) => (
-                <PlaylistCard key={pl._id ?? i} playlist={pl} index={i} />
+                <PlaylistCard key={pl._id ?? pl.id ?? i} playlist={pl} index={i} />
               ))}
             </div>
           )}
@@ -201,7 +181,7 @@ export default function Home() {
   );
 }
 
-/* ── Icons ──────────────────────────────────────────────────── */
+/* ── Icons ── */
 function PlayIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -209,7 +189,6 @@ function PlayIcon() {
     </svg>
   );
 }
-
 function MusicNoteIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -219,7 +198,6 @@ function MusicNoteIcon() {
     </svg>
   );
 }
-
 function PlaylistIcon() {
   return (
     <svg
@@ -236,6 +214,24 @@ function PlaylistIcon() {
       <line x1="3" y1="6" x2="3.01" y2="6" />
       <line x1="3" y1="12" x2="3.01" y2="12" />
       <line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+  );
+}
+function HeartIcon({ filled }) {
+  return filled ? (
+    <svg viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+    </svg>
+  ) : (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
 }

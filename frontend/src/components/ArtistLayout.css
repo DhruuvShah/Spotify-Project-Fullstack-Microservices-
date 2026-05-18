@@ -1,0 +1,228 @@
+/* ── Artist Layout ──────────────────────────────────────────── */
+.al-root {
+  display: flex;
+  min-height: 100svh;
+  background: var(--color-bg-base);
+  position: relative;
+}
+
+/* Mobile top bar (hidden on desktop) */
+.al-topbar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-4);
+  background: rgba(18, 18, 18, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  z-index: var(--z-sticky);
+}
+.al-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-base);
+  font-weight: var(--font-bold);
+  color: var(--color-brand);
+}
+.al-topbar-brand .al-spotify-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--color-brand);
+}
+.al-menu-btn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  transition: background var(--duration-fast);
+}
+.al-menu-btn svg { width: 22px; height: 22px; }
+.al-menu-btn:hover { background: rgba(255,255,255,0.07); }
+
+.al-topbar-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: var(--font-bold);
+}
+
+/* Sidebar */
+.al-sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0;
+  height: 100svh;
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding: var(--space-6) 0 var(--space-4);
+  overflow-y: auto;
+}
+
+.al-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-5) var(--space-6);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-brand);
+}
+.al-sidebar-brand .al-spotify-icon {
+  width: 26px;
+  height: 26px;
+  color: var(--color-brand);
+}
+
+/* Nav */
+.al-sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 var(--space-3);
+}
+
+.al-nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 11px var(--space-3);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  transition: background var(--duration-base), color var(--duration-base);
+}
+.al-nav-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+.al-nav-link:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+.al-nav-link.active {
+  background: rgba(29, 185, 84, 0.15);
+  color: var(--color-brand);
+}
+
+/* Footer */
+.al-sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-3) 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: var(--space-4);
+}
+.al-user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+.al-user-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: var(--font-bold);
+  flex-shrink: 0;
+}
+.al-user-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.al-user-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.al-user-role {
+  font-size: var(--text-xs);
+  color: var(--color-brand);
+  font-weight: var(--font-medium);
+}
+.al-logout-btn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  transition: color var(--duration-base), background var(--duration-base);
+}
+.al-logout-btn svg { width: 18px; height: 18px; }
+.al-logout-btn:hover { color: #e05260; background: rgba(224, 82, 96, 0.1); }
+
+/* Content */
+.al-content {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+/* Overlay (mobile) */
+.al-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: calc(var(--z-sticky) - 1);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .al-topbar { display: flex; }
+  .al-overlay { display: block; }
+
+  .al-content { padding-top: 56px; }
+
+  .al-sidebar {
+    position: fixed;
+    top: 56px;
+    left: 0;
+    bottom: 0;
+    height: auto;
+    transform: translateX(-100%);
+    transition: transform var(--duration-slow) var(--ease-default);
+    z-index: var(--z-sticky);
+    background: rgba(18, 18, 18, 0.97);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
+  .al-sidebar.open { transform: translateX(0); }
+  .al-sidebar-brand { display: none; }
+}
