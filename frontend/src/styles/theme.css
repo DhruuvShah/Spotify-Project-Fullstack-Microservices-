@@ -93,8 +93,10 @@
   --z-modal:    400;
 
   /* ─── Layout ────────────────────────────────────── */
-  --sidebar-width:     240px;
-  --navbar-height:     64px;
-  --player-bar-height: 90px;
-  --content-max-w:     1400px;
+  --sidebar-width:      240px;
+  --navbar-height:      64px;
+  --topbar-height:      64px;
+  --player-bar-height:  90px;
+  --mobile-nav-height:  56px;
+  --content-max-w:      1400px;
 }

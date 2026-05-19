@@ -1,8 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "./Home.css";
-import { useNavigate, useOutletContext } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { usePlayer } from "../context/PlayerContext";
+import { useSocket } from "../context/SocketContext";
+import AddToPlaylistBtn from "../components/AddToPlaylistBtn";
 
 const PLAYLIST_GRADIENTS = [
   "linear-gradient(135deg, #1db954, #0a5c2b)",
@@ -16,18 +18,21 @@ const PLAYLIST_GRADIENTS = [
 ];
 
 /* ── Music Card ─────────────────────────────────────────────── */
-function MusicCard({ music, allMusics, socketRef }) {
-  const { playTrack, likedIds, toggleLike } = usePlayer();
+function MusicCard({ music, allMusics }) {
+  const { playTrack, likedIds, toggleLike, currentTrack, playing } = usePlayer();
+  const { emitPlay } = useSocket();
+  const navigate = useNavigate();
   const [imgErr, setImgErr] = useState(false);
+  const isCurrentlyPlaying = currentTrack?.id === music.id;
 
   function handlePlay(e) {
     e?.stopPropagation();
-    socketRef.current?.emit("play", { musicId: music.id });
+    emitPlay(music);
     playTrack(music, allMusics);
   }
 
   return (
-    <div className="home-music-card" onClick={handlePlay}>
+    <div className={`home-music-card${isCurrentlyPlaying ? " is-playing" : ""}`} onClick={handlePlay}>
       <div className="hmc-cover-wrap">
         {!imgErr && music.coverImageUrl ? (
           <img
@@ -47,18 +52,26 @@ function MusicCard({ music, allMusics, socketRef }) {
       </div>
       <div className="hmc-info">
         <span className="hmc-title">{music.title}</span>
-        <span className="hmc-artist">{music.artist}</span>
+        <button
+          className="hmc-artist hmc-artist-btn"
+          onClick={(e) => { e.stopPropagation(); if (music.artistId) navigate(`/artist/${music.artistId}`); }}
+        >
+          {music.artist}
+        </button>
       </div>
-      <button
-        className={`hmc-like-btn${likedIds.has(music.id) ? " liked" : ""}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleLike(music.id);
-        }}
-        title={likedIds.has(music.id) ? "Unlike" : "Like"}
-      >
-        <HeartIcon filled={likedIds.has(music.id)} />
-      </button>
+      <div className="hmc-bottom-bar">
+        <AddToPlaylistBtn musicId={music.id} />
+        <button
+          className={`hmc-like-btn${likedIds.has(music.id) ? " liked" : ""}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleLike(music.id);
+          }}
+          title={likedIds.has(music.id) ? "Unlike" : "Like"}
+        >
+          <HeartIcon filled={likedIds.has(music.id)} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -90,12 +103,159 @@ function PlaylistCard({ playlist, index }) {
   );
 }
 
+/* ── User Playlist Card ─────────────────────────────────────── */
+function UserPlaylistCard({ playlist, index, onDelete, onRename }) {
+  const navigate = useNavigate();
+  const [showRename, setShowRename] = useState(false);
+  const [renameVal, setRenameVal] = useState(playlist.title);
+  const [renameErr, setRenameErr] = useState("");
+  const [renameLoading, setRenameLoading] = useState(false);
+  const gradient = PLAYLIST_GRADIENTS[(index + 4) % PLAYLIST_GRADIENTS.length];
+  const count = Array.isArray(playlist.musics) ? playlist.musics.length : 0;
+
+  function handleDelete(e) {
+    e.stopPropagation();
+    if (!window.confirm(`Delete playlist "${playlist.title}"?`)) return;
+    axios
+      .delete(`http://localhost:3002/api/music/user-playlist/${playlist._id}`, { withCredentials: true })
+      .then(() => onDelete(playlist._id))
+      .catch(() => {});
+  }
+
+  function handleRenameSubmit(e) {
+    e.preventDefault();
+    if (!renameVal.trim()) { setRenameErr("Name is required"); return; }
+    setRenameLoading(true);
+    axios
+      .patch(`http://localhost:3002/api/music/user-playlist/${playlist._id}`, { title: renameVal.trim() }, { withCredentials: true })
+      .then(() => {
+        onRename(playlist._id, renameVal.trim());
+        setShowRename(false);
+        setRenameErr("");
+      })
+      .catch((err) => setRenameErr(err.response?.data?.message || "Failed to rename"))
+      .finally(() => setRenameLoading(false));
+  }
+
+  return (
+    <>
+      <div
+        className="home-playlist-card"
+        onClick={() => navigate(`/user-playlist/${playlist._id}`)}
+      >
+        <div className="hpc-cover" style={{ background: gradient }}>
+          <PlaylistIcon />
+          <div className="hpc-play-btn">
+            <PlayIcon />
+          </div>
+        </div>
+        <div className="hpc-info">
+          <span className="hpc-title">{playlist.title}</span>
+          <span className="hpc-meta">
+            {count} {count === 1 ? "song" : "songs"} &bull; My playlist
+          </span>
+        </div>
+        <div className="hpc-card-footer">
+          <button
+            className="hpc-action-btn"
+            onClick={(e) => { e.stopPropagation(); setRenameVal(playlist.title); setShowRename(true); }}
+            title="Rename playlist"
+          >
+            <PencilIcon />
+          </button>
+          <button className="hpc-action-btn danger" onClick={handleDelete} title="Delete playlist">
+            <TrashIcon />
+          </button>
+        </div>
+      </div>
+      {showRename && (
+        <div className="hm-modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget) setShowRename(false); }}>
+          <div className="hm-modal">
+            <h2 className="hm-modal-title">Rename Playlist</h2>
+            <form onSubmit={handleRenameSubmit} className="hm-modal-form">
+              <input
+                type="text"
+                className="hm-modal-input"
+                placeholder="Playlist name"
+                value={renameVal}
+                maxLength={100}
+                autoFocus
+                onChange={(e) => setRenameVal(e.target.value)}
+              />
+              {renameErr && <p className="hm-modal-error">{renameErr}</p>}
+              <div className="hm-modal-actions">
+                <button type="button" className="hm-modal-cancel" onClick={() => setShowRename(false)}>Cancel</button>
+                <button type="submit" className="hm-modal-create" disabled={renameLoading}>
+                  {renameLoading ? "Saving…" : "Rename"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ── Create Playlist Modal ──────────────────────────────────── */
+function CreatePlaylistModal({ onClose, onCreate }) {
+  const [title, setTitle] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const inputRef = useRef(null);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!title.trim()) { setError("Playlist name is required"); return; }
+    setLoading(true);
+    setError("");
+    axios
+      .post("http://localhost:3002/api/music/user-playlist", { title: title.trim() }, { withCredentials: true })
+      .then((res) => { onCreate(res.data.playlist); onClose(); })
+      .catch((err) => setError(err.response?.data?.message || "Failed to create playlist"))
+      .finally(() => setLoading(false));
+  }
+
+  function handleBackdrop(e) {
+    if (e.target === e.currentTarget) onClose();
+  }
+
+  return (
+    <div className="hm-modal-backdrop" onClick={handleBackdrop}>
+      <div className="hm-modal">
+        <h2 className="hm-modal-title">New Playlist</h2>
+        <form onSubmit={handleSubmit} className="hm-modal-form">
+          <input
+            ref={inputRef}
+            type="text"
+            className="hm-modal-input"
+            placeholder="Playlist name"
+            value={title}
+            maxLength={100}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          {error && <p className="hm-modal-error">{error}</p>}
+          <div className="hm-modal-actions">
+            <button type="button" className="hm-modal-cancel" onClick={onClose}>Cancel</button>
+            <button type="submit" className="hm-modal-create" disabled={loading}>
+              {loading ? "Creating…" : "Create"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main Component ─────────────────────────────────────────── */
 export default function Home() {
-  const { socketRef } = useOutletContext();
   const [musics, setMusics] = useState([]);
   const [playlists, setPlaylists] = useState([]);
+  const [userPlaylists, setUserPlaylists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const hour = new Date().getHours();
   const greeting =
@@ -111,15 +271,14 @@ export default function Home() {
               id: m.id ?? m._id,
               title: m.title,
               artist: m.artist,
+              artistId: m.artistId,
               coverImageUrl: m.coverImageUrl,
               musicUrl: m.musicUrl,
             }))
           )
         ),
       axios
-        .get("http://localhost:3002/api/music/playlists", {
-          withCredentials: true,
-        })
+        .get("http://localhost:3002/api/music/playlists", { withCredentials: true })
         .then((res) =>
           setPlaylists(
             res.data.playlists.map((p) => ({
@@ -130,8 +289,24 @@ export default function Home() {
             }))
           )
         ),
+      axios
+        .get("http://localhost:3002/api/music/user-playlists", { withCredentials: true })
+        .then((res) => setUserPlaylists(res.data.playlists))
+        .catch(() => {}),
     ]).finally(() => setLoading(false));
   }, []);
+
+  function handlePlaylistCreated(playlist) {
+    setUserPlaylists((prev) => [playlist, ...prev]);
+  }
+
+  function handlePlaylistDeleted(id) {
+    setUserPlaylists((prev) => prev.filter((p) => p._id !== id));
+  }
+
+  function handlePlaylistRenamed(id, newTitle) {
+    setUserPlaylists((prev) => prev.map((p) => p._id === id ? { ...p, title: newTitle } : p));
+  }
 
   return (
     <div className="home-root">
@@ -154,16 +329,42 @@ export default function Home() {
                   key={music.id ?? i}
                   music={music}
                   allMusics={musics}
-                  socketRef={socketRef}
                 />
               ))}
             </div>
           )}
         </section>
 
-        {/* Playlists */}
+        {/* My Playlists */}
         <section className="home-section">
-          <h2 className="home-section-title">Playlists</h2>
+          <div className="home-section-header">
+            <h2 className="home-section-title">My Playlists</h2>
+            <button className="home-btn-create" onClick={() => setShowCreateModal(true)}>
+              <PlusIcon /> New Playlist
+            </button>
+          </div>
+          {loading ? (
+            <p className="home-loading">Loading&hellip;</p>
+          ) : userPlaylists.length === 0 ? (
+            <p className="home-empty">No playlists yet. Create your first one!</p>
+          ) : (
+            <div className="home-playlist-grid">
+              {userPlaylists.map((pl, i) => (
+                <UserPlaylistCard
+                  key={pl._id}
+                  playlist={pl}
+                  index={i}
+                  onDelete={handlePlaylistDeleted}
+                  onRename={handlePlaylistRenamed}
+                />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Artist Playlists */}
+        <section className="home-section">
+          <h2 className="home-section-title">Featured Playlists</h2>
           {loading ? (
             <p className="home-loading">Loading&hellip;</p>
           ) : playlists.length === 0 ? (
@@ -177,11 +378,40 @@ export default function Home() {
           )}
         </section>
       </main>
+
+      {showCreateModal && (
+        <CreatePlaylistModal
+          onClose={() => setShowCreateModal(false)}
+          onCreate={handlePlaylistCreated}
+        />
+      )}
     </div>
   );
 }
 
 /* ── Icons ── */
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" width="14" height="14">
+      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+      <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" />
+    </svg>
+  );
+}
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
+      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+    </svg>
+  );
+}
 function PlayIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor">

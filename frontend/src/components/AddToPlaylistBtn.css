@@ -1,0 +1,82 @@
+.atp-wrap {
+  position: relative;
+}
+
+.atp-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: none;
+  color: rgba(255,255,255,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: color var(--duration-fast), background var(--duration-fast);
+}
+.atp-btn:hover,
+.atp-btn.active {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+}
+
+.atp-dropdown {
+  position: fixed;
+  background: #2a2a2a;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  min-width: 200px;
+  max-width: 260px;
+  padding: 6px 0;
+  z-index: 9999;
+  animation: atpIn 0.12s ease;
+}
+@keyframes atpIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.atp-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.35);
+  padding: 4px 12px 6px;
+  margin: 0;
+}
+
+.atp-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.85);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--duration-fast);
+  white-space: nowrap;
+  overflow: hidden;
+}
+.atp-item:hover { background: rgba(255,255,255,0.08); }
+.atp-item.added { color: var(--color-brand); cursor: default; }
+.atp-item svg { flex-shrink: 0; }
+
+.atp-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.atp-empty {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.4);
+  margin: 0;
+}

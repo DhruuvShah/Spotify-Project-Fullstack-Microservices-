@@ -1,11 +1,12 @@
-import { BrowserRouter, Routes, Route, Outlet, useNavigate } from "react-router-dom";
-import { useEffect, useRef } from "react";
-import { io } from "socket.io-client";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { AuthProvider } from "./context/AuthContext";
 import { PlayerProvider, usePlayer } from "./context/PlayerContext";
+import { SocketProvider } from "./context/SocketContext";
 import ProtectedRoute from "./components/ProtectedRoute";
-import Navbar from "./components/Navbar";
-import ArtistLayout from "./components/ArtistLayout";
+import Sidebar from "./components/Sidebar";
+import TopBar from "./components/TopBar";
+import MobileNav from "./components/MobileNav";
 import BottomPlayer from "./components/BottomPlayer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -16,8 +17,9 @@ import PlaylistDetail from "./pages/PlaylistDetail";
 import Search from "./pages/Search";
 import ArtistDashboard from "./pages/artist/ArtistDashboard";
 import UploadMusic from "./pages/artist/UploadMusic";
+import ArtistProfile from "./pages/ArtistProfile";
+import UserPlaylistDetail from "./pages/UserPlaylistDetail";
 
-// Syncs body padding-bottom so content never hides under the player bar
 function BodyPaddingSync() {
   const { currentTrack } = usePlayer();
   useEffect(() => {
@@ -32,38 +34,18 @@ function BodyPaddingSync() {
   return null;
 }
 
-function WithNavbar() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
-  const socketRef = useRef(null);
-
-  useEffect(() => {
-    if (!user) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
-      return;
-    }
-
-    const socket = io("http://localhost:3002", { withCredentials: true });
-    socketRef.current = socket;
-
-    socket.on("play", ({ musicId }) => {
-      navigate(`/music/${musicId}`);
-    });
-
-    return () => {
-      socket.disconnect();
-      socketRef.current = null;
-    };
-  }, [user?.id, navigate]);
-
+function AppLayout() {
   return (
-    <>
-      <Navbar />
-      <Outlet context={{ socketRef }} />
-    </>
+    <div className="app-layout">
+      <Sidebar />
+      <div className="app-main">
+        <TopBar />
+        <div className="app-scroll">
+          <Outlet />
+        </div>
+      </div>
+      <MobileNav />
+    </div>
   );
 }
 
@@ -72,32 +54,28 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <PlayerProvider>
-          <BodyPaddingSync />
-          <Routes>
-            {/* Public + standard layout */}
-            <Route element={<WithNavbar />}>
+          <SocketProvider>
+            <BodyPaddingSync />
+            <Routes>
+              {/* Auth pages — no sidebar/topbar */}
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
-              <Route path="/music/:id" element={<ProtectedRoute><MusicPlayer /></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/playlist/:id" element={<ProtectedRoute><PlaylistDetail /></ProtectedRoute>} />
-              <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
-            </Route>
 
-            {/* Artist layout (sidebar) */}
-            <Route
-              element={
-                <ProtectedRoute requiredRole="artist">
-                  <ArtistLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="/artist/dashboard" element={<ArtistDashboard />} />
-              <Route path="/artist/dashboard/upload-music" element={<UploadMusic />} />
-            </Route>
-          </Routes>
-          <BottomPlayer />
+              {/* App pages — sidebar + topbar layout */}
+              <Route element={<AppLayout />}>
+                <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+                <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                <Route path="/playlist/:id" element={<ProtectedRoute><PlaylistDetail /></ProtectedRoute>} />
+                <Route path="/user-playlist/:id" element={<ProtectedRoute><UserPlaylistDetail /></ProtectedRoute>} />
+                <Route path="/artist/:artistId" element={<ProtectedRoute><ArtistProfile /></ProtectedRoute>} />
+                <Route path="/music/:id" element={<ProtectedRoute><MusicPlayer /></ProtectedRoute>} />
+                <Route path="/artist/dashboard" element={<ProtectedRoute requiredRole="artist"><ArtistDashboard /></ProtectedRoute>} />
+                <Route path="/artist/dashboard/upload-music" element={<ProtectedRoute requiredRole="artist"><UploadMusic /></ProtectedRoute>} />
+              </Route>
+            </Routes>
+            <BottomPlayer />
+          </SocketProvider>
         </PlayerProvider>
       </AuthProvider>
     </BrowserRouter>

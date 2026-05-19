@@ -133,6 +133,15 @@ export default function BottomPlayer() {
           >
             <HeartIcon filled={isLiked} />
           </button>
+          {/* Mobile-only compact play/pause — bp-center is hidden on mobile */}
+          <button
+            className="bp-mobile-play"
+            onClick={togglePlay}
+            title={playing ? "Pause" : "Play"}
+            aria-label={playing ? "Pause" : "Play"}
+          >
+            {playing ? <PauseIcon /> : <PlayIcon />}
+          </button>
         </div>
 
         {/* ── Center: controls + seek ── */}

@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams, useOutletContext } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { usePlayer } from "../context/PlayerContext";
+import { useSocket } from "../context/SocketContext";
+import AddToPlaylistBtn from "../components/AddToPlaylistBtn";
 import "./Search.css";
 
 function TrackCover({ src, alt }) {
@@ -24,8 +26,9 @@ function TrackCover({ src, alt }) {
 }
 
 export default function Search() {
-  const { socketRef } = useOutletContext();
-  const { playTrack, likedIds, toggleLike } = usePlayer();
+  const { emitPlay } = useSocket();
+  const { playTrack, likedIds, toggleLike, currentTrack } = usePlayer();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [results, setResults] = useState([]);
@@ -72,7 +75,7 @@ export default function Search() {
   }
 
   function handlePlay(track) {
-    socketRef.current?.emit("play", { musicId: track.id });
+    emitPlay(track);
     playTrack(track, results);
   }
 
@@ -124,14 +127,19 @@ export default function Search() {
               {results.map((track, i) => (
                 <div
                   key={track.id ?? i}
-                  className="sr-row"
+                  className={`sr-row${currentTrack?.id === (track.id ?? track._id) ? " is-playing" : ""}`}
                   onClick={() => handlePlay(track)}
                 >
                   <span className="sr-num">{i + 1}</span>
                   <TrackCover src={track.coverImageUrl} alt={track.title} />
                   <div className="sr-info">
                     <span className="sr-title">{track.title}</span>
-                    <span className="sr-artist">{track.artist}</span>
+                    <button
+                      className="sr-artist sr-artist-btn"
+                      onClick={(e) => { e.stopPropagation(); if (track.artistId) navigate(`/artist/${track.artistId}`); }}
+                    >
+                      {track.artist}
+                    </button>
                   </div>
                   <button
                     className={`sr-like-btn${likedIds.has(track.id) ? " liked" : ""}`}
@@ -143,6 +151,9 @@ export default function Search() {
                   >
                     <HeartIcon filled={likedIds.has(track.id)} />
                   </button>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <AddToPlaylistBtn musicId={track.id} />
+                  </div>
                   <button
                     className="sr-play-btn"
                     onClick={(e) => {

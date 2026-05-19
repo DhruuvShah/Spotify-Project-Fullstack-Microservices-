@@ -1,6 +1,6 @@
 /* ── Music Player ───────────────────────────────────────────── */
 .mp-root {
-  min-height: calc(100svh - var(--navbar-height));
+  min-height: calc(100svh - var(--topbar-height));
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -21,7 +21,7 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-4);
-  min-height: calc(100svh - var(--navbar-height));
+  min-height: calc(100svh - var(--topbar-height));
   color: rgba(255, 255, 255, 0.5);
   font-size: var(--text-sm);
 }

@@ -90,7 +90,7 @@
 
 .sr-row {
   display: grid;
-  grid-template-columns: 32px 46px 1fr 36px 36px;
+  grid-template-columns: 32px 46px 1fr 36px 36px 36px;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-4);
@@ -145,6 +145,16 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.sr-artist-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: color var(--duration-fast);
+}
+.sr-artist-btn:hover { color: rgba(255,255,255,0.85); }
 
 .sr-like-btn {
   background: none;
@@ -180,7 +190,12 @@
 .sr-play-btn svg { width: 13px; height: 13px; fill: currentColor; margin-left: 1px; }
 .sr-play-btn:hover { background: var(--color-brand-hover); transform: scale(1.08); }
 
+/* Currently playing row */
+.sr-row.is-playing { background: rgba(29, 185, 84, 0.06); }
+.sr-row.is-playing .sr-num { color: var(--color-brand); }
+.sr-row.is-playing .sr-title { color: var(--color-brand); }
+
 @media (max-width: 600px) {
-  .sr-row { grid-template-columns: 28px 42px 1fr 32px; }
+  .sr-row { grid-template-columns: 28px 42px 1fr 32px 32px; }
   .sr-play-btn { display: none; }
 }

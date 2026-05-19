@@ -1,6 +1,6 @@
 /* ── Shared Auth Page Styles (Login + Register) ─────────────── */
 .auth-page {
-  min-height: calc(100svh - var(--navbar-height));
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;

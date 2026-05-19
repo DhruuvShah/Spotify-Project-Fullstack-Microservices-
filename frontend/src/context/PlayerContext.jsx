@@ -71,6 +71,11 @@ export function PlayerProvider({ children }) {
     setCurrentTime(0);
     setDuration(0);
     setPlaying(true);
+
+    // fire-and-forget: record this play in history
+    axios
+      .post(`http://localhost:3002/api/music/history/${norm.id}`, {}, { withCredentials: true })
+      .catch(() => {});
   }, []);
 
   function jumpTo(track, idx) {

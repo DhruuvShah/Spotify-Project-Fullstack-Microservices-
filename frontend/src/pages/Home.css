@@ -1,6 +1,6 @@
 /* ── Home Page ──────────────────────────────────────────────── */
 .home-root {
-  min-height: calc(100svh - var(--navbar-height));
+  min-height: calc(100svh - var(--topbar-height));
   background: var(--color-bg-base);
   padding-bottom: var(--space-16);
 }
@@ -27,6 +27,28 @@
 
 /* Section */
 .home-section { display: flex; flex-direction: column; gap: var(--space-4); }
+.home-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.home-btn-create {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+  color: #000;
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background var(--duration-base), transform var(--duration-fast);
+}
+.home-btn-create:hover { background: var(--color-brand-hover); transform: scale(1.03); }
 .home-section-title {
   font-size: clamp(var(--text-xl), 3vw, var(--text-2xl));
   font-weight: var(--font-bold);
@@ -125,10 +147,16 @@
   flex-direction: column;
   gap: 3px;
 }
+.hmc-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-1);
+  padding: 0 var(--space-2) var(--space-2);
+}
+
 .hmc-like-btn {
   display: flex;
-  align-self: flex-end;
-  margin: 0 var(--space-2) var(--space-2) auto;
   background: none;
   border: none;
   cursor: pointer;
@@ -156,6 +184,24 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.hmc-artist-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  transition: color var(--duration-fast);
+}
+.hmc-artist-btn:hover { color: #fff; }
+
+/* Currently playing card */
+.home-music-card.is-playing {
+  border-color: rgba(29, 185, 84, 0.45);
+  background: rgba(29, 185, 84, 0.07);
+}
+.home-music-card.is-playing .hmc-title { color: var(--color-brand); }
+.home-music-card.is-playing .hmc-play-btn { opacity: 1; transform: translateY(0); }
 
 /* ── Playlist cards (grid) ─────────────────────────── */
 .home-playlist-grid {
@@ -231,6 +277,111 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* Rename / delete footer on user playlist card */
+.hpc-card-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2) var(--space-2);
+}
+.hpc-action-btn {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  transition: color var(--duration-fast);
+}
+.hpc-action-btn:hover { color: #fff; }
+.hpc-action-btn.danger:hover { color: #e05260; }
+
+/* ── Create Playlist Modal ── */
+.hm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.hm-modal {
+  background: rgba(28,28,28,0.98);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  width: min(380px, 90vw);
+  box-shadow: 0 24px 64px rgba(0,0,0,0.7);
+  animation: modalIn 0.2s var(--ease-default);
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+.hm-modal-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: #fff;
+  margin: 0 0 var(--space-5);
+}
+.hm-modal-form { display: flex; flex-direction: column; gap: var(--space-4); }
+.hm-modal-input {
+  width: 100%;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-size: var(--text-base);
+  padding: 12px 16px;
+  outline: none;
+  transition: border-color var(--duration-base);
+}
+.hm-modal-input:focus { border-color: var(--color-brand); }
+.hm-modal-input::placeholder { color: rgba(255,255,255,0.3); }
+.hm-modal-error {
+  font-size: var(--text-sm);
+  color: #e05260;
+  margin: 0;
+}
+.hm-modal-actions {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: flex-end;
+}
+.hm-modal-cancel {
+  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.15);
+  color: rgba(255,255,255,0.7);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: border-color var(--duration-fast), color var(--duration-fast);
+}
+.hm-modal-cancel:hover { border-color: rgba(255,255,255,0.3); color: #fff; }
+.hm-modal-create {
+  padding: 10px 22px;
+  border-radius: var(--radius-full);
+  background: var(--color-brand);
+  border: none;
+  color: #000;
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  cursor: pointer;
+  transition: background var(--duration-base);
+}
+.hm-modal-create:hover:not(:disabled) { background: var(--color-brand-hover); }
+.hm-modal-create:disabled { opacity: 0.6; cursor: not-allowed; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {

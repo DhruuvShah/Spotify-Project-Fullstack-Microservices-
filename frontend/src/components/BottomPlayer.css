@@ -360,21 +360,50 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
+/* ── Mobile play button (desktop: hidden) ── */
+.bp-mobile-play {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--color-brand);
+  border: none;
+  border-radius: var(--radius-full);
+  color: #000;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: background var(--duration-base), transform var(--duration-fast);
+}
+.bp-mobile-play svg { width: 14px; height: 14px; fill: currentColor; margin-left: 1px; }
+.bp-mobile-play:hover { background: var(--color-brand-hover); transform: scale(1.07); }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
+  /* Compact 64px mini-player: sits above mobile nav */
   .bp-root {
     grid-template-columns: 1fr auto;
-    height: auto;
+    height: 64px;
     min-height: 64px;
-    padding: var(--space-3) var(--space-4);
+    padding: 0 var(--space-4);
     gap: var(--space-3);
+    bottom: var(--mobile-nav-height); /* sit above bottom nav */
   }
+  .bp-mobile-play { display: flex; }
+  .bp-center { display: none; }
   .bp-right { display: none; }
-  .bp-center { align-items: stretch; width: 100%; }
   .bp-cover { width: 44px; height: 44px; }
+  /* Queue panel: full width, above mini player + mobile nav */
+  .bp-queue-panel {
+    width: 100%;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--mobile-nav-height) + 64px);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
 }
 
-@media (max-width: 480px) {
-  .bp-time { display: none; }
-  .bp-progress { margin-top: 4px; }
+@media (max-width: 400px) {
+  /* On very small phones, hide the heart to avoid crowding */
+  .bp-like-btn { display: none; }
 }

@@ -76,7 +76,34 @@ img { max-width: 100%; display: block; }
   border-radius: 4px;
 }
 
-/* Push page content above the bottom player bar when it's visible */
+/* ── App layout (sidebar + main) ── */
+.app-layout {
+  display: flex;
+  min-height: 100svh;
+}
+.app-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  min-width: 0;
+}
+.app-scroll {
+  /* pages fill this container */
+}
+@media (max-width: 768px) {
+  .app-main { margin-left: 0; }
+}
+
+/* Push content above the bottom player bar */
 body.has-player {
   padding-bottom: var(--player-bar-height);
+}
+
+/* Mobile: always pad for bottom nav, extra for player */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: var(--mobile-nav-height);
+  }
+  body.has-player {
+    padding-bottom: calc(var(--mobile-nav-height) + 64px);
+  }
 }

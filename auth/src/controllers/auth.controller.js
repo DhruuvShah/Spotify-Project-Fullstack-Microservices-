@@ -4,6 +4,14 @@ import bcrypt from "bcryptjs";
 import config from "../config/config.js";
 import { publishToQueue } from "../broker/rabbit.js";
 
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  maxAge: 2 * 24 * 60 * 60 * 1000,
+  path: "/",
+};
+
 export async function register(req, res) {
   const {
     email,
@@ -47,7 +55,7 @@ export async function register(req, res) {
     role: user.role,
   });
 
-  res.cookie("token", token);
+  res.cookie("token", token, COOKIE_OPTIONS);
   res.status(201).json({
     message: "User created successfully",
     user: {
@@ -77,7 +85,7 @@ export async function googleAuthCallback(req, res) {
       { expiresIn: "2d" },
     );
 
-    res.cookie("token", token);
+    res.cookie("token", token, COOKIE_OPTIONS);
 
     if (isUserAlreadyExists.role === "artist") {
       return res.redirect("http://localhost:5173/artist/dashboard");
@@ -119,7 +127,7 @@ export async function googleAuthCallback(req, res) {
   //   role: newUser.role,
   // });
 
-  res.cookie("token", token);
+  res.cookie("token", token, COOKIE_OPTIONS);
 
   res.status(201).json({
     message: "User created successfully",
@@ -156,7 +164,7 @@ export async function me(req, res) {
 }
 
 export function logout(req, res) {
-  res.clearCookie("token", { path: "/" });
+  res.clearCookie("token", COOKIE_OPTIONS);
   return res.status(200).json({ message: "Logged out successfully" });
 }
 
@@ -185,7 +193,7 @@ export async function login(req, res) {
     { expiresIn: "2d" },
   );
 
-  res.cookie("token", token);
+  res.cookie("token", token, COOKIE_OPTIONS);
 
   res.redirect("http://localhost:5173");
   res.status(200).json({

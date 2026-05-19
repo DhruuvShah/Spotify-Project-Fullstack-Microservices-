@@ -6,7 +6,7 @@ import cookie from "cookie";
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: "http://localhost:5173",
+      origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
       credentials: true,
     },
   });
@@ -21,20 +21,26 @@ function initSocketServer(httpServer) {
 
     try {
       const decoded = jwt.verify(token, config.JWT_SECRET);
-      socket.user = decoded;
+      // Store only what's needed — never log the full payload
+      socket.user = { id: decoded.id, role: decoded.role };
       next();
-    } catch (error) {
+    } catch {
       return next(new Error("Authentication error: Invalid token"));
     }
   });
 
   io.on("connection", (socket) => {
-    console.log("A user connected", socket.user);
+    console.log(`Socket connected: userId=${socket.user.id} role=${socket.user.role}`);
     socket.join(socket.user.id);
 
     socket.on("play", (data) => {
-      const musicId = data.musicId;
-      socket.broadcast.to(socket.user.id).emit("play", { musicId });
+      if (!data || typeof data !== "object") return;
+      // Relay full track payload to all other devices for this user
+      socket.broadcast.to(socket.user.id).emit("play", data);
+    });
+
+    socket.on("error", (err) => {
+      console.error(`Socket error userId=${socket.user?.id}:`, err.message);
     });
 
     socket.on("disconnect", () => {
