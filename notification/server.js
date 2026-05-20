@@ -4,6 +4,6 @@ import startListener from "./src/broker/listener.js";
 
 connect().then(startListener);
 
-app.listen(3000, () => {
-  console.log("Notification service is running on port 3000");
+app.listen(process.env.PORT || 3001, () => {
+  console.log("Notification service is running on port", process.env.PORT || 3001);
 }); 

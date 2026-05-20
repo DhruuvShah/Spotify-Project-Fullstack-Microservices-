@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { usePlayer } from "../context/PlayerContext";
 import { useSocket } from "../context/SocketContext";
 import "./ArtistProfile.css";
+import { AUTH_URL, MUSIC_URL } from "../config.js";
 
 export default function ArtistProfile() {
   const { artistId } = useParams();
@@ -21,8 +22,8 @@ export default function ArtistProfile() {
 
   useEffect(() => {
     Promise.all([
-      axios.get(`http://localhost:3000/api/auth/artist/${artistId}`, { withCredentials: true }),
-      axios.get(`http://localhost:3002/api/music/by-artist/${artistId}`, { withCredentials: true }),
+      axios.get(`${AUTH_URL}/api/auth/artist/${artistId}`, { withCredentials: true }),
+      axios.get(`${MUSIC_URL}/api/music/by-artist/${artistId}`, { withCredentials: true }),
     ])
       .then(([artistRes, musicRes]) => {
         setArtist(artistRes.data.artist);
@@ -38,11 +39,11 @@ export default function ArtistProfile() {
     setFollowLoading(true);
     try {
       if (following) {
-        await axios.delete(`http://localhost:3000/api/auth/follow/${artistId}`, { withCredentials: true });
+        await axios.delete(`${AUTH_URL}/api/auth/follow/${artistId}`, { withCredentials: true });
         setFollowing(false);
         setArtist((a) => ({ ...a, followerCount: a.followerCount - 1 }));
       } else {
-        await axios.post(`http://localhost:3000/api/auth/follow/${artistId}`, {}, { withCredentials: true });
+        await axios.post(`${AUTH_URL}/api/auth/follow/${artistId}`, {}, { withCredentials: true });
         setFollowing(true);
         setArtist((a) => ({ ...a, followerCount: a.followerCount + 1 }));
       }

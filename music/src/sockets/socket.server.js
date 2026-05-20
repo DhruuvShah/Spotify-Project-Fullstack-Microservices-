@@ -6,7 +6,7 @@ import cookie from "cookie";
 function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+      origin: process.env.FRONTEND_URL || "http://localhost:5173",
       credentials: true,
     },
   });

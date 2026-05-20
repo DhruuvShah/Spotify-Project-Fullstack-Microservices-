@@ -8,6 +8,6 @@ const httpServer = http.createServer(app);
 connectDB();
 initSocketServer(httpServer);
 
-httpServer.listen(3002, () => {
-  console.log("Server is running on port 3002");
+httpServer.listen(process.env.PORT || 3002, () => {
+  console.log("Server is running on port", process.env.PORT || 3002);
 });

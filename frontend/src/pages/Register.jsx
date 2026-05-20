@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
+import { AUTH_URL } from "../config.js";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function Register() {
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/register",
+        `${AUTH_URL}/api/auth/register`,
         {
           email: form.email,
           fullname: { firstName: form.firstName, lastName: form.lastName },
@@ -62,7 +63,7 @@ export default function Register() {
         <button
           type="button"
           className="btn-google"
-          onClick={() => { window.location.href = "http://localhost:3000/api/auth/google"; }}
+          onClick={() => { window.location.href = `${AUTH_URL}/api/auth/google`; }}
         >
           <GoogleIcon />
           Continue with Google

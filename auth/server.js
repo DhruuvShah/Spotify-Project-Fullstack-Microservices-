@@ -5,6 +5,6 @@ import { connect } from "./src/broker/rabbit.js";
 connectDB();
 connect();
 
-app.listen(3000, () => {
-  console.log("Auth server is running on port 3000");
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Auth server is running on port", process.env.PORT || 3000);
 });

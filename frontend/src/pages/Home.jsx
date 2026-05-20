@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { usePlayer } from "../context/PlayerContext";
 import { useSocket } from "../context/SocketContext";
 import AddToPlaylistBtn from "../components/AddToPlaylistBtn";
+import { MUSIC_URL } from "../config.js";
 
 const PLAYLIST_GRADIENTS = [
   "linear-gradient(135deg, #1db954, #0a5c2b)",
@@ -79,8 +80,21 @@ function MusicCard({ music, allMusics }) {
 /* ── Playlist Card ──────────────────────────────────────────── */
 function PlaylistCard({ playlist, index }) {
   const navigate = useNavigate();
+  const { playTrack } = usePlayer();
+  const { emitPlay } = useSocket();
   const gradient = PLAYLIST_GRADIENTS[index % PLAYLIST_GRADIENTS.length];
   const count = Array.isArray(playlist.musics) ? playlist.musics.length : 0;
+
+  function handlePlay(e) {
+    e.stopPropagation();
+    axios
+      .get(`${MUSIC_URL}/api/music/playlist/${playlist.id}`, { withCredentials: true })
+      .then((res) => {
+        const tracks = res.data.playlist?.musics;
+        if (tracks?.length > 0) { emitPlay(tracks[0]); playTrack(tracks[0], tracks); }
+      })
+      .catch(() => {});
+  }
 
   return (
     <div
@@ -89,9 +103,9 @@ function PlaylistCard({ playlist, index }) {
     >
       <div className="hpc-cover" style={{ background: gradient }}>
         <PlaylistIcon />
-        <div className="hpc-play-btn">
+        <button className="hpc-play-btn" onClick={handlePlay} title="Play playlist">
           <PlayIcon />
-        </div>
+        </button>
       </div>
       <div className="hpc-info">
         <span className="hpc-title">{playlist.title}</span>
@@ -106,6 +120,8 @@ function PlaylistCard({ playlist, index }) {
 /* ── User Playlist Card ─────────────────────────────────────── */
 function UserPlaylistCard({ playlist, index, onDelete, onRename }) {
   const navigate = useNavigate();
+  const { playTrack } = usePlayer();
+  const { emitPlay } = useSocket();
   const [showRename, setShowRename] = useState(false);
   const [renameVal, setRenameVal] = useState(playlist.title);
   const [renameErr, setRenameErr] = useState("");
@@ -117,7 +133,7 @@ function UserPlaylistCard({ playlist, index, onDelete, onRename }) {
     e.stopPropagation();
     if (!window.confirm(`Delete playlist "${playlist.title}"?`)) return;
     axios
-      .delete(`http://localhost:3002/api/music/user-playlist/${playlist._id}`, { withCredentials: true })
+      .delete(`${MUSIC_URL}/api/music/user-playlist/${playlist._id}`, { withCredentials: true })
       .then(() => onDelete(playlist._id))
       .catch(() => {});
   }
@@ -127,7 +143,7 @@ function UserPlaylistCard({ playlist, index, onDelete, onRename }) {
     if (!renameVal.trim()) { setRenameErr("Name is required"); return; }
     setRenameLoading(true);
     axios
-      .patch(`http://localhost:3002/api/music/user-playlist/${playlist._id}`, { title: renameVal.trim() }, { withCredentials: true })
+      .patch(`${MUSIC_URL}/api/music/user-playlist/${playlist._id}`, { title: renameVal.trim() }, { withCredentials: true })
       .then(() => {
         onRename(playlist._id, renameVal.trim());
         setShowRename(false);
@@ -135,6 +151,17 @@ function UserPlaylistCard({ playlist, index, onDelete, onRename }) {
       })
       .catch((err) => setRenameErr(err.response?.data?.message || "Failed to rename"))
       .finally(() => setRenameLoading(false));
+  }
+
+  function handlePlay(e) {
+    e.stopPropagation();
+    axios
+      .get(`${MUSIC_URL}/api/music/user-playlist/${playlist._id}`, { withCredentials: true })
+      .then((res) => {
+        const tracks = res.data.playlist?.musics;
+        if (tracks?.length > 0) { emitPlay(tracks[0]); playTrack(tracks[0], tracks); }
+      })
+      .catch(() => {});
   }
 
   return (
@@ -145,9 +172,9 @@ function UserPlaylistCard({ playlist, index, onDelete, onRename }) {
       >
         <div className="hpc-cover" style={{ background: gradient }}>
           <PlaylistIcon />
-          <div className="hpc-play-btn">
+          <button className="hpc-play-btn" onClick={handlePlay} title="Play playlist">
             <PlayIcon />
-          </div>
+          </button>
         </div>
         <div className="hpc-info">
           <span className="hpc-title">{playlist.title}</span>
@@ -212,7 +239,7 @@ function CreatePlaylistModal({ onClose, onCreate }) {
     setLoading(true);
     setError("");
     axios
-      .post("http://localhost:3002/api/music/user-playlist", { title: title.trim() }, { withCredentials: true })
+      .post(`${MUSIC_URL}/api/music/user-playlist`, { title: title.trim() }, { withCredentials: true })
       .then((res) => { onCreate(res.data.playlist); onClose(); })
       .catch((err) => setError(err.response?.data?.message || "Failed to create playlist"))
       .finally(() => setLoading(false));
@@ -264,7 +291,7 @@ export default function Home() {
   useEffect(() => {
     Promise.all([
       axios
-        .get("http://localhost:3002/api/music/", { withCredentials: true })
+        .get(`${MUSIC_URL}/api/music/`, { withCredentials: true })
         .then((res) =>
           setMusics(
             res.data.musics.map((m) => ({
@@ -278,7 +305,7 @@ export default function Home() {
           )
         ),
       axios
-        .get("http://localhost:3002/api/music/playlists", { withCredentials: true })
+        .get(`${MUSIC_URL}/api/music/playlists`, { withCredentials: true })
         .then((res) =>
           setPlaylists(
             res.data.playlists.map((p) => ({
@@ -290,7 +317,7 @@ export default function Home() {
           )
         ),
       axios
-        .get("http://localhost:3002/api/music/user-playlists", { withCredentials: true })
+        .get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
         .then((res) => setUserPlaylists(res.data.playlists))
         .catch(() => {}),
     ]).finally(() => setLoading(false));

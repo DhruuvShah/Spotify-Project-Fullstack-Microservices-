@@ -4,6 +4,7 @@ import axios from "axios";
 import { usePlayer } from "../context/PlayerContext";
 import { useSocket } from "../context/SocketContext";
 import "./PlaylistDetail.css";
+import { MUSIC_URL } from "../config.js";
 
 function TrackCover({ src, alt }) {
   const [err, setErr] = useState(false);
@@ -53,7 +54,7 @@ export default function PlaylistDetail() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3002/api/music/playlist/${id}`, {
+      .get(`${MUSIC_URL}/api/music/playlist/${id}`, {
         withCredentials: true,
       })
       .then((res) => setPlaylist(res.data.playlist))

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { usePlayer } from "./PlayerContext";
+import { MUSIC_URL } from "../config.js";
 
 const SocketContext = createContext(null);
 
@@ -19,7 +20,7 @@ export function SocketProvider({ children }) {
       return;
     }
 
-    const socket = io("http://localhost:3002", { withCredentials: true });
+    const socket = io(MUSIC_URL, { withCredentials: true });
     socketRef.current = socket;
 
     socket.on("play", ({ track }) => {

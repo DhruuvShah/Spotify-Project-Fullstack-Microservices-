@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "./ArtistDashboard.css";
 import axios from "axios";
 import { usePlayer } from "../../context/PlayerContext";
+import { MUSIC_URL } from "../../config.js";
 
 /* ── Playlist cover: 2×2 grid of first 4 music covers ── */
 function PlaylistCover({ musics }) {
@@ -83,8 +84,8 @@ function SongPickerModal({ targetTitle, type, targetId, allTracks, currentMusics
   function addTrack(track) {
     const musicId = String(track._id ?? track.id);
     const url = type === "playlist"
-      ? `http://localhost:3002/api/music/playlist/${targetId}/add/${musicId}`
-      : `http://localhost:3002/api/music/album/${targetId}/add/${musicId}`;
+      ? `${MUSIC_URL}/api/music/playlist/${targetId}/add/${musicId}`
+      : `${MUSIC_URL}/api/music/album/${targetId}/add/${musicId}`;
 
     axios
       .patch(url, {}, { withCredentials: true })
@@ -148,13 +149,13 @@ export default function ArtistDashboard() {
   const [editTitle, setEditTitle] = useState("");
 
   useEffect(() => {
-    axios.get("http://localhost:3002/api/music/artist-musics", { withCredentials: true })
+    axios.get(`${MUSIC_URL}/api/music/artist-musics`, { withCredentials: true })
       .then((res) => setMusics(res.data.musics.map((m) => ({ ...m, id: m._id ?? m.id }))))
       .catch(() => {});
-    axios.get("http://localhost:3002/api/music/playlist/artist", { withCredentials: true })
+    axios.get(`${MUSIC_URL}/api/music/playlist/artist`, { withCredentials: true })
       .then((res) => setPlaylists(res.data.playlists))
       .catch(() => {});
-    axios.get("http://localhost:3002/api/music/album/artist", { withCredentials: true })
+    axios.get(`${MUSIC_URL}/api/music/album/artist`, { withCredentials: true })
       .then((res) => setAlbums(res.data.albums))
       .catch(() => setAlbums([]));
   }, []);
@@ -162,7 +163,7 @@ export default function ArtistDashboard() {
   useEffect(() => {
     if (activeTab !== "analytics") return;
     setAnalyticsLoading(true);
-    axios.get("http://localhost:3002/api/music/analytics", { withCredentials: true })
+    axios.get(`${MUSIC_URL}/api/music/analytics`, { withCredentials: true })
       .then((res) => setAnalytics(res.data))
       .catch(() => setAnalytics(null))
       .finally(() => setAnalyticsLoading(false));
@@ -178,7 +179,7 @@ export default function ArtistDashboard() {
     e.stopPropagation();
     if (!editTitle.trim()) return;
     axios
-      .patch(`http://localhost:3002/api/music/${musicId}`, { title: editTitle.trim() }, { withCredentials: true })
+      .patch(`${MUSIC_URL}/api/music/${musicId}`, { title: editTitle.trim() }, { withCredentials: true })
       .then((res) => {
         setMusics((prev) => prev.map((m) =>
           (m._id ?? m.id) === musicId ? { ...m, title: res.data.music.title } : m
@@ -197,13 +198,13 @@ export default function ArtistDashboard() {
     e.stopPropagation();
     if (!window.confirm("Delete this track? This cannot be undone.")) return;
     axios
-      .delete(`http://localhost:3002/api/music/${musicId}`, { withCredentials: true })
+      .delete(`${MUSIC_URL}/api/music/${musicId}`, { withCredentials: true })
       .then(() => setMusics((prev) => prev.filter((m) => (m._id ?? m.id) !== musicId)))
       .catch(() => {});
   }
 
   function handleCreatePlaylist(title, setError, setLoading) {
-    axios.post("http://localhost:3002/api/music/playlist", { title, musics: [] }, { withCredentials: true })
+    axios.post(`${MUSIC_URL}/api/music/playlist`, { title, musics: [] }, { withCredentials: true })
       .then((res) => {
         setPlaylists((prev) => [...prev, { ...res.data.playlist, musics: [] }]);
         setShowCreatePlaylist(false);
@@ -215,7 +216,7 @@ export default function ArtistDashboard() {
   }
 
   function handleCreateAlbum(title, setError, setLoading) {
-    axios.post("http://localhost:3002/api/music/album", { title }, { withCredentials: true })
+    axios.post(`${MUSIC_URL}/api/music/album`, { title }, { withCredentials: true })
       .then((res) => {
         setAlbums((prev) => [{ ...res.data.album, musics: [] }, ...prev]);
         setShowCreateAlbum(false);
@@ -245,7 +246,7 @@ export default function ArtistDashboard() {
 
   function removeFromPlaylist(playlistId, musicId) {
     axios
-      .patch(`http://localhost:3002/api/music/playlist/${playlistId}/remove/${musicId}`, {}, { withCredentials: true })
+      .patch(`${MUSIC_URL}/api/music/playlist/${playlistId}/remove/${musicId}`, {}, { withCredentials: true })
       .then(() => {
         setPlaylists((prev) => prev.map((pl) =>
           String(pl.id ?? pl._id) === String(playlistId)
@@ -258,7 +259,7 @@ export default function ArtistDashboard() {
 
   function removeFromAlbum(albumId, musicId) {
     axios
-      .patch(`http://localhost:3002/api/music/album/${albumId}/remove/${musicId}`, {}, { withCredentials: true })
+      .patch(`${MUSIC_URL}/api/music/album/${albumId}/remove/${musicId}`, {}, { withCredentials: true })
       .then(() => {
         setAlbums((prev) => prev.map((al) =>
           String(al.id ?? al._id) === String(albumId)
@@ -272,7 +273,7 @@ export default function ArtistDashboard() {
   function deletePlaylist(playlistId) {
     if (!window.confirm("Delete this playlist? This cannot be undone.")) return;
     axios
-      .delete(`http://localhost:3002/api/music/playlist/${playlistId}`, { withCredentials: true })
+      .delete(`${MUSIC_URL}/api/music/playlist/${playlistId}`, { withCredentials: true })
       .then(() => setPlaylists((prev) => prev.filter((pl) => String(pl.id ?? pl._id) !== String(playlistId))))
       .catch(() => {});
   }
@@ -280,7 +281,7 @@ export default function ArtistDashboard() {
   function deleteAlbum(albumId) {
     if (!window.confirm("Delete this album? This cannot be undone.")) return;
     axios
-      .delete(`http://localhost:3002/api/music/album/${albumId}`, { withCredentials: true })
+      .delete(`${MUSIC_URL}/api/music/album/${albumId}`, { withCredentials: true })
       .then(() => setAlbums((prev) => prev.filter((al) => String(al.id ?? al._id) !== String(albumId))))
       .catch(() => {});
   }
@@ -288,8 +289,8 @@ export default function ArtistDashboard() {
   function handleRename(newTitle, setError, setLoading) {
     const { type, id } = renameTarget;
     const url = type === "playlist"
-      ? `http://localhost:3002/api/music/playlist/${id}`
-      : `http://localhost:3002/api/music/album/${id}`;
+      ? `${MUSIC_URL}/api/music/playlist/${id}`
+      : `${MUSIC_URL}/api/music/album/${id}`;
     axios
       .patch(url, { title: newTitle }, { withCredentials: true })
       .then(() => {

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { usePlayer } from "../context/PlayerContext";
 import "./MusicPlayer.css";
+import { MUSIC_URL } from "../config.js";
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
@@ -54,7 +55,7 @@ export default function MusicPlayer() {
     setLoading(true);
     setError("");
     axios
-      .get(`http://localhost:3002/api/music/get-details/${id}`, {
+      .get(`${MUSIC_URL}/api/music/get-details/${id}`, {
         withCredentials: true,
       })
       .then((res) => playTrack(res.data.music))

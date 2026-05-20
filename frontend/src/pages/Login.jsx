@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import "./Login.css";
+import { AUTH_URL } from "../config.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/login",
+        `${AUTH_URL}/api/auth/login`,
         { email: form.email, password: form.password },
         { withCredentials: true },
       );
@@ -50,7 +51,7 @@ export default function Login() {
         <button
           type="button"
           className="btn-google"
-          onClick={() => { window.location.href = "http://localhost:3000/api/auth/google"; }}
+          onClick={() => { window.location.href = `${AUTH_URL}/api/auth/google`; }}
         >
           <GoogleIcon />
           Continue with Google

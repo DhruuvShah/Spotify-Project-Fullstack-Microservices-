@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./UploadMusic.css";
+import { MUSIC_URL } from "../../config.js";
 
 /* ── Audio Player ─────────────────────────────────────────────── */
 function AudioPlayer({ musicUrl, coverPreview, title }) {
@@ -195,7 +196,7 @@ export default function UploadMusic() {
     try {
       setLoading(true);
       await axios
-        .post("http://localhost:3002/api/music/upload", formData, {
+        .post(`${MUSIC_URL}/api/music/upload`, formData, {
           withCredentials: true,
         })
         .then(() => {

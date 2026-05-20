@@ -4,6 +4,7 @@ import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import { usePlayer } from "../context/PlayerContext";
 import "./Profile.css";
+import { AUTH_URL, MUSIC_URL } from "../config.js";
 
 export default function Profile() {
   const { user, logout } = useAuth();
@@ -26,27 +27,27 @@ export default function Profile() {
     if (!user) return;
 
     if (user.role === "artist") {
-      axios.get("http://localhost:3002/api/music/artist-musics", { withCredentials: true })
+      axios.get(`${MUSIC_URL}/api/music/artist-musics`, { withCredentials: true })
         .then((res) => setTrackCount(res.data.musics.length))
         .catch(() => setTrackCount(0));
 
-      axios.get("http://localhost:3002/api/music/playlist/artist", { withCredentials: true })
+      axios.get(`${MUSIC_URL}/api/music/playlist/artist`, { withCredentials: true })
         .then((res) => setArtistPlaylistCount(res.data.playlists.length))
         .catch(() => setArtistPlaylistCount(0));
 
-      axios.get("http://localhost:3000/api/auth/artist/" + user.id, { withCredentials: true })
+      axios.get(`${AUTH_URL}/api/auth/artist/${user.id}`, { withCredentials: true })
         .then((res) => setFollowerCount(res.data.artist.followerCount))
         .catch(() => setFollowerCount(0));
     } else {
-      axios.get("http://localhost:3002/api/music/history", { withCredentials: true })
+      axios.get(`${MUSIC_URL}/api/music/history`, { withCredentials: true })
         .then((res) => setHistory(res.data.musics))
         .catch(() => setHistory([]));
 
-      axios.get("http://localhost:3002/api/music/user-playlists", { withCredentials: true })
+      axios.get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
         .then((res) => setUserPlaylists(res.data.playlists))
         .catch(() => setUserPlaylists([]));
 
-      axios.get("http://localhost:3000/api/auth/following", { withCredentials: true })
+      axios.get(`${AUTH_URL}/api/auth/following`, { withCredentials: true })
         .then((res) => setFollowedArtists(res.data.artists))
         .catch(() => setFollowedArtists([]));
     }

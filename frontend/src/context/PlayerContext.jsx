@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import axios from "axios";
 import { useAuth } from "./AuthContext";
+import { MUSIC_URL } from "../config.js";
 
 const PlayerContext = createContext(null);
 
@@ -54,7 +55,7 @@ export function PlayerProvider({ children }) {
       return;
     }
     axios
-      .get("http://localhost:3002/api/music/likes", { withCredentials: true })
+      .get(`${MUSIC_URL}/api/music/likes`, { withCredentials: true })
       .then((res) => setLikedIds(new Set(res.data.likedIds)))
       .catch(() => {});
   }, [user?.id]);
@@ -74,7 +75,7 @@ export function PlayerProvider({ children }) {
 
     // fire-and-forget: record this play in history
     axios
-      .post(`http://localhost:3002/api/music/history/${norm.id}`, {}, { withCredentials: true })
+      .post(`${MUSIC_URL}/api/music/history/${norm.id}`, {}, { withCredentials: true })
       .catch(() => {});
   }, []);
 
@@ -152,12 +153,12 @@ export function PlayerProvider({ children }) {
       });
       try {
         if (isLiked) {
-          await axios.delete(`http://localhost:3002/api/music/like/${id}`, {
+          await axios.delete(`${MUSIC_URL}/api/music/like/${id}`, {
             withCredentials: true,
           });
         } else {
           await axios.post(
-            `http://localhost:3002/api/music/like/${id}`,
+            `${MUSIC_URL}/api/music/like/${id}`,
             {},
             { withCredentials: true }
           );

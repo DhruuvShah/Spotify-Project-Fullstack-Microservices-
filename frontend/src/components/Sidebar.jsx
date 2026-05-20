@@ -3,6 +3,7 @@ import { Link, NavLink, useLocation } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 import "./Sidebar.css";
+import { MUSIC_URL } from "../config.js";
 
 export default function Sidebar() {
   const { user } = useAuth();
@@ -15,7 +16,7 @@ export default function Sidebar() {
   useEffect(() => {
     if (!user) return;
     axios
-      .get("http://localhost:3002/api/music/user-playlists", { withCredentials: true })
+      .get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
       .then((res) => setPlaylists(res.data.playlists))
       .catch(() => {});
   }, [user, location.pathname]);
@@ -26,7 +27,7 @@ export default function Sidebar() {
     setCreating(true);
     try {
       const res = await axios.post(
-        "http://localhost:3002/api/music/user-playlist",
+        `${MUSIC_URL}/api/music/user-playlist`,
         { title: newTitle.trim() },
         { withCredentials: true }
       );

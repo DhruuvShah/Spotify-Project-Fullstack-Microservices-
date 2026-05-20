@@ -5,6 +5,7 @@ import likeModel from "../models/like.model.js";
 import historyModel from "../models/history.model.js";
 import userPlaylistModel from "../models/userPlaylist.model.js";
 import albumModel from "../models/album.model.js";
+import { cacheGet, cacheSet, cacheDel, cacheDelByPrefix } from "../utils/cache.js";
 
 /* ── helpers ── */
 function musicShape(m) {
@@ -60,6 +61,9 @@ export async function uploadMusic(req, res) {
       coverImageUrl: coverUpload.url,
     });
 
+    cacheDelByPrefix("musics:all:");
+    cacheDel("artist-musics:" + req.user.id);
+
     return res.status(201).json({ message: "Music uploaded successfully", music });
   } catch (error) {
     console.error("Error uploading music:", error);
@@ -70,6 +74,10 @@ export async function uploadMusic(req, res) {
 export async function getAllMusics(req, res) {
   const skip = Math.max(0, parseInt(req.query.skip, 10) || 0);
   const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 20));
+  const cacheKey = `musics:all:${skip}:${limit}`;
+
+  const cached = cacheGet(cacheKey);
+  if (cached !== undefined) return res.status(200).json({ message: "Musics fetched successfully", musics: cached });
 
   try {
     const musicsDocs = await musicModel.find().skip(skip).limit(limit);
@@ -81,6 +89,7 @@ export async function getAllMusics(req, res) {
       })
     );
 
+    cacheSet(cacheKey, music, 60);
     return res.status(200).json({ message: "Musics fetched successfully", musics: music });
   } catch (error) {
     console.error("Error fetching music:", error);
@@ -121,6 +130,10 @@ export async function createPlaylist(req, res) {
       artistId: req.user.id,
       musics: musics ?? [],
     });
+
+    cacheDel("playlists:all");
+    cacheDel("artist-playlists:" + req.user.id);
+
     return res.status(201).json({ message: "Playlist created successfully", playlist });
   } catch (error) {
     console.error("Error creating playlist:", error);
@@ -129,8 +142,12 @@ export async function createPlaylist(req, res) {
 }
 
 export async function getPlaylists(req, res) {
+  const cached = cacheGet("playlists:all");
+  if (cached !== undefined) return res.status(200).json({ playlists: cached });
+
   try {
     const playlists = await playlistModel.find().sort({ createdAt: -1 }).limit(50);
+    cacheSet("playlists:all", playlists, 120);
     return res.status(200).json({ playlists });
   } catch (error) {
     console.error("Error fetching playlists:", error);
@@ -140,6 +157,11 @@ export async function getPlaylists(req, res) {
 
 export async function getPlaylistById(req, res) {
   const { id } = req.params;
+  const cacheKey = `playlist:${id}`;
+
+  const cached = cacheGet(cacheKey);
+  if (cached !== undefined) return res.status(200).json({ playlist: cached });
+
   try {
     const playlistDoc = await playlistModel.findById(id);
     if (!playlistDoc) return res.status(404).json({ message: "Playlist not found" });
@@ -152,9 +174,9 @@ export async function getPlaylistById(req, res) {
       .filter(Boolean)
       .map(musicShape);
 
-    return res.status(200).json({
-      playlist: { id: playlistDoc._id, title: playlistDoc.title, artist: playlistDoc.artist, musics },
-    });
+    const result = { id: playlistDoc._id, title: playlistDoc.title, artist: playlistDoc.artist, musics };
+    cacheSet(cacheKey, result, 300);
+    return res.status(200).json({ playlist: result });
   } catch (error) {
     console.error("Error fetching playlist:", error);
     return res.status(500).json({ message: "Error fetching playlist" });
@@ -162,6 +184,11 @@ export async function getPlaylistById(req, res) {
 }
 
 export async function getArtistPlaylists(req, res) {
+  const cacheKey = `artist-playlists:${req.user.id}`;
+
+  const cached = cacheGet(cacheKey);
+  if (cached !== undefined) return res.status(200).json({ playlists: cached });
+
   try {
     const playlistDocs = await playlistModel.find({ artistId: req.user.id });
 
@@ -176,6 +203,7 @@ export async function getArtistPlaylists(req, res) {
       })
     );
 
+    cacheSet(cacheKey, playlists, 120);
     return res.status(200).json({ playlists });
   } catch (error) {
     console.error("Error fetching artist playlists:", error);
@@ -308,6 +336,11 @@ export async function getUserPlaylists(req, res) {
 
 export async function getUserPlaylistById(req, res) {
   const { id } = req.params;
+  const cacheKey = `user-playlist:${id}`;
+
+  const cached = cacheGet(cacheKey);
+  if (cached !== undefined) return res.status(200).json({ playlist: cached });
+
   try {
     const playlistDoc = await userPlaylistModel.findOne({ _id: id, userId: req.user.id });
     if (!playlistDoc) return res.status(404).json({ message: "Playlist not found" });
@@ -318,9 +351,9 @@ export async function getUserPlaylistById(req, res) {
       .filter(Boolean)
       .map(musicShape);
 
-    return res.status(200).json({
-      playlist: { id: playlistDoc._id, title: playlistDoc.title, musics },
-    });
+    const result = { id: playlistDoc._id, title: playlistDoc.title, musics };
+    cacheSet(cacheKey, result, 300);
+    return res.status(200).json({ playlist: result });
   } catch (error) {
     console.error("Error fetching user playlist:", error);
     return res.status(500).json({ message: "Error fetching playlist" });
@@ -339,6 +372,9 @@ export async function addMusicToUserPlaylist(req, res) {
 
     playlist.musics.push(musicId);
     await playlist.save();
+
+    cacheDel("user-playlist:" + id);
+
     return res.status(200).json({ message: "Song added to playlist" });
   } catch (error) {
     console.error("Error adding to user playlist:", error);
@@ -354,6 +390,9 @@ export async function removeMusicFromUserPlaylist(req, res) {
 
     playlist.musics = playlist.musics.filter((m) => m.toString() !== musicId);
     await playlist.save();
+
+    cacheDel("user-playlist:" + id);
+
     return res.status(200).json({ message: "Song removed from playlist" });
   } catch (error) {
     console.error("Error removing from user playlist:", error);
@@ -366,6 +405,9 @@ export async function deleteUserPlaylist(req, res) {
   try {
     const result = await userPlaylistModel.deleteOne({ _id: id, userId: req.user.id });
     if (result.deletedCount === 0) return res.status(404).json({ message: "Playlist not found" });
+
+    cacheDel("user-playlist:" + id);
+
     return res.status(200).json({ message: "Playlist deleted" });
   } catch (error) {
     console.error("Error deleting user playlist:", error);
@@ -390,6 +432,14 @@ export async function editMusic(req, res) {
 
     music.title = title.trim();
     await music.save();
+
+    cacheDelByPrefix("musics:all:");
+    cacheDel("artist-musics:" + req.user.id);
+    cacheDelByPrefix("playlist:");
+    cacheDelByPrefix("user-playlist:");
+    cacheDelByPrefix("artist-playlists:");
+    cacheDelByPrefix("artist-albums:");
+
     return res.status(200).json({ message: "Music updated", music: musicShape(music) });
   } catch (error) {
     console.error("Error editing music:", error);
@@ -415,6 +465,14 @@ export async function deleteMusic(req, res) {
       historyModel.deleteMany({ musicId: id }),
     ]);
 
+    cacheDelByPrefix("musics:all:");
+    cacheDel("artist-musics:" + req.user.id);
+    cacheDelByPrefix("playlist:");
+    cacheDelByPrefix("user-playlist:");
+    cacheDelByPrefix("artist-playlists:");
+    cacheDelByPrefix("artist-albums:");
+    cacheDel("analytics:" + req.user.id);
+
     return res.status(200).json({ message: "Music deleted" });
   } catch (error) {
     console.error("Error deleting music:", error);
@@ -425,6 +483,11 @@ export async function deleteMusic(req, res) {
 /* ── analytics ─────────────────────────────────────────────────────── */
 
 export async function getMusicAnalytics(req, res) {
+  const cacheKey = `analytics:${req.user.id}`;
+
+  const cached = cacheGet(cacheKey);
+  if (cached !== undefined) return res.status(200).json(cached);
+
   try {
     const artistMusics = await musicModel.find({ artistId: req.user.id }, { _id: 1, title: 1 });
     const musicIds = artistMusics.map((m) => m._id);
@@ -469,7 +532,9 @@ export async function getMusicAnalytics(req, res) {
       { totalPlays: 0, totalLikes: 0 }
     );
 
-    return res.status(200).json({ analytics, totals, trackCount: artistMusics.length });
+    const result = { analytics, totals, trackCount: artistMusics.length };
+    cacheSet(cacheKey, result, 300);
+    return res.status(200).json(result);
   } catch (error) {
     console.error("Error fetching analytics:", error);
     return res.status(500).json({ message: "Error fetching analytics" });
@@ -489,6 +554,9 @@ export async function createAlbum(req, res) {
       artistId: req.user.id,
       musics: [],
     });
+
+    cacheDel("artist-albums:" + req.user.id);
+
     return res.status(201).json({ message: "Album created", album });
   } catch (error) {
     console.error("Error creating album:", error);
@@ -497,6 +565,11 @@ export async function createAlbum(req, res) {
 }
 
 export async function getArtistAlbums(req, res) {
+  const cacheKey = `artist-albums:${req.user.id}`;
+
+  const cached = cacheGet(cacheKey);
+  if (cached !== undefined) return res.status(200).json({ albums: cached });
+
   try {
     const albumDocs = await albumModel.find({ artistId: req.user.id }).sort({ createdAt: -1 });
 
@@ -511,6 +584,7 @@ export async function getArtistAlbums(req, res) {
       })
     );
 
+    cacheSet(cacheKey, albums, 120);
     return res.status(200).json({ albums });
   } catch (error) {
     console.error("Error fetching albums:", error);
@@ -530,6 +604,9 @@ export async function addMusicToAlbum(req, res) {
 
     album.musics.push(musicId);
     await album.save();
+
+    cacheDel("artist-albums:" + req.user.id);
+
     return res.status(200).json({ message: "Song added to album" });
   } catch (error) {
     console.error("Error adding to album:", error);
@@ -539,9 +616,16 @@ export async function addMusicToAlbum(req, res) {
 
 export async function getPublicArtistMusics(req, res) {
   const { artistId } = req.params;
+  const cacheKey = `artist-musics:${artistId}`;
+
+  const cached = cacheGet(cacheKey);
+  if (cached !== undefined) return res.status(200).json({ musics: cached });
+
   try {
     const musics = await musicModel.find({ artistId }).limit(20);
-    return res.status(200).json({ musics: musics.map(musicShape) });
+    const result = musics.map(musicShape);
+    cacheSet(cacheKey, result, 120);
+    return res.status(200).json({ musics: result });
   } catch (error) {
     console.error("Error fetching artist public musics:", error);
     return res.status(500).json({ message: "Error fetching musics" });
@@ -560,6 +644,11 @@ export async function addMusicToArtistPlaylist(req, res) {
     }
     playlist.musics.push(musicId);
     await playlist.save();
+
+    cacheDel("playlist:" + id);
+    cacheDel("playlists:all");
+    cacheDel("artist-playlists:" + req.user.id);
+
     return res.status(200).json({ message: "Song added to playlist" });
   } catch (error) {
     console.error("Error adding to artist playlist:", error);
@@ -575,6 +664,11 @@ export async function removeMusicFromArtistPlaylist(req, res) {
       { $pull: { musics: musicId } }
     );
     if (result.matchedCount === 0) return res.status(404).json({ message: "Playlist not found" });
+
+    cacheDel("playlist:" + id);
+    cacheDel("playlists:all");
+    cacheDel("artist-playlists:" + req.user.id);
+
     return res.status(200).json({ message: "Song removed" });
   } catch (error) {
     console.error("Error removing from artist playlist:", error);
@@ -590,6 +684,9 @@ export async function removeMusicFromAlbum(req, res) {
       { $pull: { musics: musicId } }
     );
     if (result.matchedCount === 0) return res.status(404).json({ message: "Album not found" });
+
+    cacheDel("artist-albums:" + req.user.id);
+
     return res.status(200).json({ message: "Song removed" });
   } catch (error) {
     console.error("Error removing from album:", error);
@@ -608,6 +705,11 @@ export async function renameArtistPlaylist(req, res) {
       { new: true }
     );
     if (!playlist) return res.status(404).json({ message: "Playlist not found" });
+
+    cacheDel("playlist:" + id);
+    cacheDel("playlists:all");
+    cacheDel("artist-playlists:" + req.user.id);
+
     return res.status(200).json({ message: "Playlist renamed", playlist });
   } catch (error) {
     console.error("Error renaming playlist:", error);
@@ -620,6 +722,11 @@ export async function deleteArtistPlaylist(req, res) {
   try {
     const result = await playlistModel.deleteOne({ _id: id, artistId: req.user.id });
     if (result.deletedCount === 0) return res.status(404).json({ message: "Playlist not found" });
+
+    cacheDel("playlist:" + id);
+    cacheDel("playlists:all");
+    cacheDel("artist-playlists:" + req.user.id);
+
     return res.status(200).json({ message: "Playlist deleted" });
   } catch (error) {
     console.error("Error deleting playlist:", error);
@@ -638,6 +745,9 @@ export async function renameArtistAlbum(req, res) {
       { new: true }
     );
     if (!album) return res.status(404).json({ message: "Album not found" });
+
+    cacheDel("artist-albums:" + req.user.id);
+
     return res.status(200).json({ message: "Album renamed", album });
   } catch (error) {
     console.error("Error renaming album:", error);
@@ -650,6 +760,9 @@ export async function deleteArtistAlbum(req, res) {
   try {
     const result = await albumModel.deleteOne({ _id: id, artistId: req.user.id });
     if (result.deletedCount === 0) return res.status(404).json({ message: "Album not found" });
+
+    cacheDel("artist-albums:" + req.user.id);
+
     return res.status(200).json({ message: "Album deleted" });
   } catch (error) {
     console.error("Error deleting album:", error);
@@ -669,6 +782,9 @@ export async function renameUserPlaylist(req, res) {
       { new: true }
     );
     if (!playlist) return res.status(404).json({ message: "Playlist not found" });
+
+    cacheDel("user-playlist:" + id);
+
     return res.status(200).json({ message: "Playlist renamed", playlist });
   } catch (error) {
     console.error("Error renaming user playlist:", error);

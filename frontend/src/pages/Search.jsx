@@ -5,6 +5,7 @@ import { usePlayer } from "../context/PlayerContext";
 import { useSocket } from "../context/SocketContext";
 import AddToPlaylistBtn from "../components/AddToPlaylistBtn";
 import "./Search.css";
+import { MUSIC_URL } from "../config.js";
 
 function TrackCover({ src, alt }) {
   const [err, setErr] = useState(false);
@@ -53,7 +54,7 @@ export default function Search() {
     setLoading(true);
     debounceRef.current = setTimeout(() => {
       axios
-        .get(`http://localhost:3002/api/music/search?q=${encodeURIComponent(q)}`, {
+        .get(`${MUSIC_URL}/api/music/search?q=${encodeURIComponent(q)}`, {
           withCredentials: true,
         })
         .then((res) => setResults(res.data.musics))

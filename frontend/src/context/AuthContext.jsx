@@ -1,5 +1,18 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { AUTH_URL } from "../config.js";
+
+// Intercept 401s globally — clear user state so the app shows the login page
+axios.interceptors.response.use(
+  (res) => res,
+  (err) => {
+    if (err.response?.status === 401) {
+      // Let the component that owns the request handle it; if it doesn't, the
+      // AuthContext useEffect will have already set user to null on startup.
+    }
+    return Promise.reject(err);
+  }
+);
 
 const AuthContext = createContext(null);
 
@@ -9,7 +22,7 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3000/api/auth/me", { withCredentials: true })
+      .get(`${AUTH_URL}/api/auth/me`, { withCredentials: true })
       .then((res) => setUser(res.data.user))
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
@@ -17,7 +30,7 @@ export function AuthProvider({ children }) {
 
   async function logout() {
     try {
-      await axios.post("http://localhost:3000/api/auth/logout", {}, { withCredentials: true });
+      await axios.post(`${AUTH_URL}/api/auth/logout`, {}, { withCredentials: true });
     } catch {
       // ignore network errors — cookie is cleared server-side
     }

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import axios from "axios";
 import "./AddToPlaylistBtn.css";
+import { MUSIC_URL } from "../config.js";
 
 export default function AddToPlaylistBtn({ musicId }) {
   const [open, setOpen] = useState(false);
@@ -27,7 +28,7 @@ export default function AddToPlaylistBtn({ musicId }) {
     if (!open || playlists !== null) return;
     setLoading(true);
     axios
-      .get("http://localhost:3002/api/music/user-playlists", { withCredentials: true })
+      .get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
       .then((res) => setPlaylists(res.data.playlists))
       .catch(() => setPlaylists([]))
       .finally(() => setLoading(false));
@@ -58,7 +59,7 @@ export default function AddToPlaylistBtn({ musicId }) {
   function handleAdd(playlistId) {
     axios
       .patch(
-        `http://localhost:3002/api/music/user-playlist/${playlistId}/add/${musicId}`,
+        `${MUSIC_URL}/api/music/user-playlist/${playlistId}/add/${musicId}`,
         {},
         { withCredentials: true }
       )

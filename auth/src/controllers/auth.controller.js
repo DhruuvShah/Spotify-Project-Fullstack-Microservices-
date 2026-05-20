@@ -4,13 +4,18 @@ import bcrypt from "bcryptjs";
 import config from "../config/config.js";
 import { publishToQueue } from "../broker/rabbit.js";
 
+const IS_PROD = process.env.NODE_ENV === "production";
+
 const COOKIE_OPTIONS = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
-  maxAge: 2 * 24 * 60 * 60 * 1000,
+  secure: IS_PROD,
+  sameSite: IS_PROD ? "none" : "lax",
+  maxAge: 30 * 24 * 60 * 60 * 1000,
   path: "/",
 };
+
+const TOKEN_TTL = "30d";
+const RENEW_THRESHOLD_MS = 7 * 24 * 60 * 60 * 1000;
 
 export async function register(req, res) {
   const {
@@ -45,7 +50,7 @@ export async function register(req, res) {
       fullname: user.fullname,
     },
     config.JWT_SECRET,
-    { expiresIn: "2d" },
+    { expiresIn: TOKEN_TTL },
   );
 
   await publishToQueue("user_created", {
@@ -82,16 +87,17 @@ export async function googleAuthCallback(req, res) {
         fullname: isUserAlreadyExists.fullname,
       },
       config.JWT_SECRET,
-      { expiresIn: "2d" },
+      { expiresIn: TOKEN_TTL },
     );
 
     res.cookie("token", token, COOKIE_OPTIONS);
 
+    const base = process.env.FRONTEND_URL || "http://localhost:5173";
     if (isUserAlreadyExists.role === "artist") {
-      return res.redirect("http://localhost:5173/artist/dashboard");
+      return res.redirect(`${base}/artist/dashboard`);
     }
 
-    return res.redirect("http://localhost:5173");
+    return res.redirect(base);
   }
 
   const newUser = await userModel.create({
@@ -117,7 +123,7 @@ export async function googleAuthCallback(req, res) {
       fullname: newUser.fullname,
     },
     config.JWT_SECRET,
-    { expiresIn: "2d" },
+    { expiresIn: TOKEN_TTL },
   );
 
   // await publishToQueue("user_created", {
@@ -129,15 +135,8 @@ export async function googleAuthCallback(req, res) {
 
   res.cookie("token", token, COOKIE_OPTIONS);
 
-  res.status(201).json({
-    message: "User created successfully",
-    user: {
-      id: newUser._id,
-      email: newUser.email,
-      fullname: newUser.fullname,
-      role: newUser.role,
-    },
-  });
+  const base = process.env.FRONTEND_URL || "http://localhost:5173";
+  return res.redirect(base);
 }
 
 export async function me(req, res) {
@@ -149,6 +148,17 @@ export async function me(req, res) {
     const user = await userModel.findById(decoded.id).select("-password");
 
     if (!user) return res.status(401).json({ message: "User not found" });
+
+    // Silently renew if token expires within the threshold
+    const expiresAt = decoded.exp * 1000;
+    if (expiresAt - Date.now() < RENEW_THRESHOLD_MS) {
+      const newToken = jwt.sign(
+        { id: user._id, role: user.role, fullname: user.fullname },
+        config.JWT_SECRET,
+        { expiresIn: TOKEN_TTL },
+      );
+      res.cookie("token", newToken, COOKIE_OPTIONS);
+    }
 
     return res.status(200).json({
       user: {
@@ -190,13 +200,12 @@ export async function login(req, res) {
       fullname: user.fullname,
     },
     config.JWT_SECRET,
-    { expiresIn: "2d" },
+    { expiresIn: TOKEN_TTL },
   );
 
   res.cookie("token", token, COOKIE_OPTIONS);
 
-  res.redirect("http://localhost:5173");
-  res.status(200).json({
+  return res.status(200).json({
     message: "Login successful",
     user: {
       id: user._id,

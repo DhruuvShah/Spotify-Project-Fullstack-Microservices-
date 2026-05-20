@@ -244,6 +244,8 @@
   width: 40px;
   height: 40px;
   background: var(--color-brand);
+  border: none;
+  padding: 0;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
@@ -252,6 +254,7 @@
   transform: translateY(8px);
   transition: opacity var(--duration-base), transform var(--duration-base);
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  cursor: pointer;
 }
 .hpc-play-btn svg { width: 16px; height: 16px; fill: #000; margin-left: 2px; }
 .home-playlist-card:hover .hpc-play-btn { opacity: 1; transform: translateY(0); }

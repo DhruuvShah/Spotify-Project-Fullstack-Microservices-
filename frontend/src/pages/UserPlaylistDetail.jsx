@@ -4,6 +4,7 @@ import axios from "axios";
 import { usePlayer } from "../context/PlayerContext";
 import { useSocket } from "../context/SocketContext";
 import "./PlaylistDetail.css";
+import { MUSIC_URL } from "../config.js";
 
 function TrackCover({ src, alt }) {
   const [err, setErr] = useState(false);
@@ -41,7 +42,7 @@ export default function UserPlaylistDetail() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:3002/api/music/user-playlist/${id}`, { withCredentials: true })
+      .get(`${MUSIC_URL}/api/music/user-playlist/${id}`, { withCredentials: true })
       .then((res) => setPlaylist(res.data.playlist))
       .catch(() => setError("Playlist not found."))
       .finally(() => setLoading(false));
@@ -49,7 +50,7 @@ export default function UserPlaylistDetail() {
 
   function removeSong(musicId) {
     axios
-      .patch(`http://localhost:3002/api/music/user-playlist/${id}/remove/${musicId}`, {}, { withCredentials: true })
+      .patch(`${MUSIC_URL}/api/music/user-playlist/${id}/remove/${musicId}`, {}, { withCredentials: true })
       .then(() => setPlaylist((prev) => ({
         ...prev,
         musics: prev.musics.filter((m) => (m.id ?? m._id) !== musicId),
