@@ -1,6 +1,11 @@
 import followModel from "../models/follow.model.js";
 import userModel from "../models/user.model.js";
-import { cacheGet, cacheSet, cacheDel, cacheDelByPrefix } from "../utils/cache.js";
+import {
+  cacheGet,
+  cacheSet,
+  cacheDel,
+  cacheDelByPrefix,
+} from "../utils/cache.js";
 
 export async function followArtist(req, res) {
   const { artistId } = req.params;
@@ -21,7 +26,8 @@ export async function followArtist(req, res) {
 
     return res.status(201).json({ message: "Followed" });
   } catch (error) {
-    if (error.code === 11000) return res.status(409).json({ message: "Already following" });
+    if (error.code === 11000)
+      return res.status(409).json({ message: "Already following" });
     return res.status(500).json({ message: "Error following artist" });
   }
 }
@@ -42,7 +48,10 @@ export async function unfollowArtist(req, res) {
 
 export async function getFollowedArtistIds(req, res) {
   try {
-    const follows = await followModel.find({ followerId: req.user.id }, { artistId: 1 });
+    const follows = await followModel.find(
+      { followerId: req.user.id },
+      { artistId: 1 },
+    );
     const artistIds = follows.map((f) => f.artistId);
     return res.status(200).json({ artistIds });
   } catch (error) {
@@ -64,7 +73,10 @@ export async function getArtistProfile(req, res) {
     }
 
     const followerCount = await followModel.countDocuments({ artistId });
-    const isFollowing = !!(await followModel.findOne({ followerId: req.user.id, artistId }));
+    const isFollowing = !!(await followModel.findOne({
+      followerId: req.user.id,
+      artistId,
+    }));
 
     const result = {
       id: artist._id,
@@ -91,13 +103,15 @@ export async function getFollowedArtists(req, res) {
       follows.map(async (f) => {
         const artist = await userModel.findById(f.artistId).select("fullname");
         if (!artist) return null;
-        const followerCount = await followModel.countDocuments({ artistId: f.artistId });
+        const followerCount = await followModel.countDocuments({
+          artistId: f.artistId,
+        });
         return {
           id: f.artistId,
           name: artist.fullname.firstName + " " + artist.fullname.lastName,
           followerCount,
         };
-      })
+      }),
     );
 
     const result = artists.filter(Boolean);

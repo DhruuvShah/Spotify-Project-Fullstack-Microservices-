@@ -1,4 +1,3 @@
-import e from "express";
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema(
@@ -8,8 +7,13 @@ const userSchema = new mongoose.Schema(
       firstName: { type: String, required: true },
       lastName: { type: String, required: true },
     },
-    googleId: { type: String },
-    password: { type: String, required: function () { return !this.googleId} },
+    googleId: { type: String, index: { sparse: true } },
+    password: {
+      type: String,
+      required: function () {
+        return !this.googleId;
+      },
+    },
     role: { type: String, enum: ["user", "artist"], default: "user" },
   },
   { timestamps: true },

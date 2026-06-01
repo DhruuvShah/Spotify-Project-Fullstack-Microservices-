@@ -9,9 +9,9 @@ async function connectDB() {
     await mongoose.connect(config.MONGO_URI, { family: 4 });
     console.log("Connected to database");
   } catch (err) {
-    console.log("Error connect to the database", err);
+    console.error("Failed to connect to the database:", err);
+    process.exit(1);
   }
 }
-
 
 export default connectDB;

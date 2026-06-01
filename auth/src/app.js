@@ -2,39 +2,40 @@ import express from "express";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
+import followRoutes from "./routes/follow.routes.js";
 import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import config from "./config/config.js";
+import { configurePassport } from "./config/passport.js";
 import cors from "cors";
 
 const app = express();
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:5173",
-  credentials: true,
-}));
-app.use(passport.initialize());
-
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: config.CLIENT_ID,
-      clientSecret: config.CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/api/auth/google/callback",
-      proxy: true,
-    },
-    (accessToken, refreshToken, profile, done) => {
-      // Here, you would typically find or create a user in your database
-      // For this example, we'll just return the profile
-      return done(null, profile);
-    },
-  ),
+app.set("trust proxy", 1);
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    credentials: true,
+  }),
 );
+
+configurePassport();
+app.use(passport.initialize());
 
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extends: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/auth", followRoutes);
+
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error(err);
+  const status = err.status ?? err.statusCode ?? 500;
+  res.status(status).json({ message: err.message || "Internal server error" });
+});
 
 export default app;
