@@ -19,19 +19,23 @@ export function PlayerProvider({ children }) {
   const { user } = useAuth();
   const audioRef = useRef(null);
 
-  // Use refs for queue/index so callbacks always see the latest values without stale closures
-  const queueRef = useRef([]);
+  // Refs so callbacks always see latest values without stale closures
+  const queueRef    = useRef([]);
   const queueIdxRef = useRef(0);
+  const repeatRef   = useRef("off");
+  const shuffleRef  = useRef(false);
 
   const [currentTrack, setCurrentTrack] = useState(null);
-  const [queue, setQueue] = useState([]);
-  const [queueIndex, setQueueIndex] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(1);
-  const [muted, setMuted] = useState(false);
-  const [likedIds, setLikedIds] = useState(new Set());
+  const [queue,        setQueue]         = useState([]);
+  const [queueIndex,   setQueueIndex]    = useState(0);
+  const [playing,      setPlaying]       = useState(false);
+  const [currentTime,  setCurrentTime]   = useState(0);
+  const [duration,     setDuration]      = useState(0);
+  const [volume,       setVolume]        = useState(1);
+  const [muted,        setMuted]         = useState(false);
+  const [likedIds,     setLikedIds]      = useState(new Set());
+  const [repeat,       setRepeat]        = useState("off"); // "off" | "all" | "one"
+  const [shuffle,      setShuffle]       = useState(false);
 
   function syncQueue(q) {
     queueRef.current = q;
@@ -61,9 +65,9 @@ export function PlayerProvider({ children }) {
   }, [user?.id]);
 
   const playTrack = useCallback((track, allTracks = []) => {
-    const norm = normalize(track);
+    const norm    = normalize(track);
     const normAll = allTracks.length > 0 ? allTracks.map(normalize) : [norm];
-    const idx = normAll.findIndex((t) => t.id === norm.id);
+    const idx     = normAll.findIndex((t) => t.id === norm.id);
     const finalIdx = idx >= 0 ? idx : 0;
 
     setCurrentTrack(norm);
@@ -73,7 +77,6 @@ export function PlayerProvider({ children }) {
     setDuration(0);
     setPlaying(true);
 
-    // fire-and-forget: record this play in history
     axios
       .post(`${MUSIC_URL}/api/music/history/${norm.id}`, {}, { withCredentials: true })
       .catch(() => {});
@@ -87,26 +90,33 @@ export function PlayerProvider({ children }) {
     setPlaying(true);
   }
 
+  function pickNextIdx() {
+    const q = queueRef.current;
+    if (!q.length) return null;
+    if (shuffleRef.current && q.length > 1) {
+      const options = q.map((_, i) => i).filter((i) => i !== queueIdxRef.current);
+      return options[Math.floor(Math.random() * options.length)];
+    }
+    const n = queueIdxRef.current + 1;
+    return n < q.length ? n : 0;
+  }
+
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (audio.paused) {
-      audio.play();
-    } else {
-      audio.pause();
-    }
+    if (audio.paused) audio.play();
+    else audio.pause();
   }, []);
 
   const next = useCallback(() => {
     const q = queueRef.current;
     if (!q.length) return;
-    const nextIdx = queueIdxRef.current + 1 < q.length ? queueIdxRef.current + 1 : 0;
-    jumpTo(q[nextIdx], nextIdx);
+    const idx = pickNextIdx();
+    if (idx !== null) jumpTo(q[idx], idx);
   }, []);
 
   const prev = useCallback(() => {
     const audio = audioRef.current;
-    // If more than 3s in, restart; otherwise go to previous
     if (audio && audio.currentTime > 3) {
       audio.currentTime = 0;
       setCurrentTime(0);
@@ -141,10 +151,24 @@ export function PlayerProvider({ children }) {
     });
   }, [volume]);
 
+  const toggleRepeat = useCallback(() => {
+    setRepeat((r) => {
+      const next = r === "off" ? "all" : r === "all" ? "one" : "off";
+      repeatRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const toggleShuffle = useCallback(() => {
+    setShuffle((s) => {
+      shuffleRef.current = !s;
+      return !s;
+    });
+  }, []);
+
   const toggleLike = useCallback(
     async (id) => {
       const isLiked = likedIds.has(id);
-      // Optimistic update
       setLikedIds((prev) => {
         const next = new Set(prev);
         if (isLiked) next.delete(id);
@@ -153,18 +177,11 @@ export function PlayerProvider({ children }) {
       });
       try {
         if (isLiked) {
-          await axios.delete(`${MUSIC_URL}/api/music/like/${id}`, {
-            withCredentials: true,
-          });
+          await axios.delete(`${MUSIC_URL}/api/music/like/${id}`, { withCredentials: true });
         } else {
-          await axios.post(
-            `${MUSIC_URL}/api/music/like/${id}`,
-            {},
-            { withCredentials: true }
-          );
+          await axios.post(`${MUSIC_URL}/api/music/like/${id}`, {}, { withCredentials: true });
         }
       } catch {
-        // Revert on error
         setLikedIds((prev) => {
           const next = new Set(prev);
           if (isLiked) next.add(id);
@@ -180,7 +197,6 @@ export function PlayerProvider({ children }) {
     syncQueue([...queueRef.current, normalize(track)]);
   }, []);
 
-  // Audio event handlers
   function handleTimeUpdate() {
     if (audioRef.current) setCurrentTime(audioRef.current.currentTime);
   }
@@ -194,13 +210,29 @@ export function PlayerProvider({ children }) {
   }
 
   function handleEnded() {
-    const q = queueRef.current;
+    const q  = queueRef.current;
     const qi = queueIdxRef.current;
-    const nextIdx = qi + 1 < q.length ? qi + 1 : null;
-    if (nextIdx === null) {
-      setPlaying(false);
-    } else {
+
+    if (repeatRef.current === "one") {
+      const audio = audioRef.current;
+      if (audio) { audio.currentTime = 0; audio.play().catch(() => {}); }
+      return;
+    }
+
+    if (shuffleRef.current && q.length > 1) {
+      const options  = q.map((_, i) => i).filter((i) => i !== qi);
+      const nextIdx  = options[Math.floor(Math.random() * options.length)];
       jumpTo(q[nextIdx], nextIdx);
+      return;
+    }
+
+    const nextIdx = qi + 1 < q.length ? qi + 1 : null;
+    if (nextIdx !== null) {
+      jumpTo(q[nextIdx], nextIdx);
+    } else if (repeatRef.current === "all") {
+      jumpTo(q[0], 0);
+    } else {
+      setPlaying(false);
     }
   }
 
@@ -216,6 +248,8 @@ export function PlayerProvider({ children }) {
         volume,
         muted,
         likedIds,
+        repeat,
+        shuffle,
         audioRef,
         playTrack,
         togglePlay,
@@ -224,6 +258,8 @@ export function PlayerProvider({ children }) {
         seek,
         changeVolume,
         toggleMute,
+        toggleRepeat,
+        toggleShuffle,
         toggleLike,
         addToQueue,
       }}

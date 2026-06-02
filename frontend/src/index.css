@@ -1,109 +1,232 @@
-/* ── Global Reset & Base ────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   Global Reset + Typography Base + Utility Primitives
+   Depends on: src/styles/theme.css (must load first)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Box model reset ────────────────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* ── Root ───────────────────────────────────────────────────── */
 html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   scroll-behavior: smooth;
+  hanging-punctuation: first last;
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background: #121212;
-  color: #ffffff;
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-base);
+  color: var(--color-on-surface);
+  background: var(--color-bg);
   min-height: 100svh;
-  line-height: 1.5;
   overflow-x: hidden;
+  /* Subtle warm ambient fill behind the page */
+  background-image:
+    radial-gradient(ellipse 80% 40% at 50% -10%, rgba(166,51,27,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 30% at 90% 60%, rgba(109,80,152,0.03) 0%, transparent 60%);
+  background-attachment: fixed;
 }
 
 #root {
   min-height: 100svh;
   display: flex;
   flex-direction: column;
+  isolation: isolate;
 }
 
-/* Typography */
+/* ── Typography: headings ───────────────────────────────────── */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  line-height: 1.2;
-  color: #ffffff;
+  font-family: var(--font-display);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-snug);
+  color: var(--color-on-surface);
 }
 
-p { margin: 0; }
-a { color: inherit; }
-button { font-family: inherit; }
-input, textarea, select { font-family: inherit; }
+h1 { font-size: var(--text-4xl); letter-spacing: var(--tracking-tight); }
+h2 { font-size: var(--text-3xl); }
+h3 { font-size: var(--text-2xl); }
+h4 { font-size: var(--text-xl); }
+h5 { font-size: var(--text-lg); }
+h6 { font-size: var(--text-md); }
 
-img { max-width: 100%; display: block; }
-
-/* Custom scrollbar */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
-
-/* Page loading (ProtectedRoute spinner) */
-.page-loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100svh;
-  background: #121212;
+/* ── Typography: body elements ──────────────────────────────── */
+p {
+  line-height: var(--leading-base);
 }
-.page-spinner {
-  width: 44px;
-  height: 44px;
-  border: 3px solid rgba(255,255,255,0.1);
-  border-top-color: #1db954;
-  border-radius: 50%;
-  animation: globalSpin 0.75s linear infinite;
+
+strong, b {
+  font-weight: var(--weight-semibold);
 }
-@keyframes globalSpin { to { transform: rotate(360deg); } }
 
-/* Selection */
-::selection { background: rgba(29,185,84,0.35); color: #fff; }
+em, i {
+  font-style: italic;
+}
 
-/* Focus ring */
+small {
+  font-size: var(--text-sm);
+  color: var(--color-on-surface-variant);
+}
+
+/* ── Links ──────────────────────────────────────────────────── */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-primary);
+}
+
+/* ── Interactive elements ───────────────────────────────────── */
+button {
+  font-family: var(--font-ui);
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input, textarea, select {
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  color: var(--color-on-surface);
+}
+
+/* Remove default list styles */
+ul, ol {
+  list-style: none;
+}
+
+/* ── Media ──────────────────────────────────────────────────── */
+img, video, svg {
+  max-width: 100%;
+  display: block;
+}
+
+img {
+  color: transparent; /* hide alt text while loading */
+}
+
+/* ── Text selection — burnt orange tint ─────────────────────── */
+::selection {
+  background: rgba(166, 51, 27, 0.15);
+  color: var(--color-on-surface);
+}
+
+/* ── Custom scrollbar — 4px, warm cream track, orange thumb ─── */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-outline-variant);
+  border-radius: var(--radius-full);
+  transition: background var(--transition-fast);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-outline);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-outline-variant) var(--color-surface);
+}
+
+/* ── Focus management — Apple-level visible ring ────────────── */
+/* Only show for keyboard navigation, never for mouse/touch */
+:focus {
+  outline: none;
+}
+
 :focus-visible {
-  outline: 2px solid #1db954;
-  outline-offset: 3px;
-  border-radius: 4px;
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
+  transition: outline-offset var(--transition-fast);
 }
 
-/* ── App layout (sidebar + main) ── */
-.app-layout {
-  display: flex;
-  min-height: 100svh;
-}
-.app-main {
-  flex: 1;
-  margin-left: var(--sidebar-width);
-  min-width: 0;
-}
-.app-scroll {
-  /* pages fill this container */
-}
-@media (max-width: 768px) {
-  .app-main { margin-left: 0; }
+/* Slightly tighter ring on small targets */
+button:focus-visible,
+a:focus-visible {
+  outline-offset: 2px;
+  border-radius: var(--radius-md);
 }
 
-/* Push content above the bottom player bar */
+/* ── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Player & nav padding ───────────────────────────────────── */
+/* Desktop: pad bottom for the persistent player bar */
 body.has-player {
-  padding-bottom: var(--player-bar-height);
+  padding-bottom: var(--player-h);
 }
 
 /* Mobile: always pad for bottom nav, extra for player */
 @media (max-width: 768px) {
   body {
-    padding-bottom: var(--mobile-nav-height);
+    padding-bottom: var(--mobile-nav-h);
   }
+
   body.has-player {
-    padding-bottom: calc(var(--mobile-nav-height) + 64px);
+    padding-bottom: calc(var(--mobile-nav-h) + 64px);
   }
+}
+
+/* ── Utility: visually hidden (accessible) ──────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Utility: truncate text ─────────────────────────────────── */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Utility: divider line ──────────────────────────────────── */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: var(--color-outline-variant);
+  border: none;
 }

@@ -1,79 +1,127 @@
-/* ── Top Bar ─────────────────────────────────────────────────── */
+/* ── TopBar ───────────────────────────────────────────────────── */
 .topbar {
   position: sticky;
   top: 0;
-  z-index: var(--z-raised);
-  height: var(--navbar-height);
+  z-index: var(--z-sticky);
+  height: var(--topbar-h);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 clamp(var(--space-4), 3vw, var(--space-8));
-  background: rgba(18, 18, 18, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  isolation: isolate;
 }
 
-/* Back / Forward nav buttons */
+/* Glass overlay — fades in once scrollY passes 20px */
+.topbar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: var(--glass-border);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  pointer-events: none;
+}
+
+.topbar--scrolled::before {
+  opacity: 1;
+}
+
+/* ── Left: back / forward ─────────────────────────────────────── */
 .topbar-left {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
 
 .topbar-nav-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.6);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: transparent;
   border: none;
-  color: #fff;
+  color: var(--color-on-surface-variant);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--duration-base);
-  flex-shrink: 0;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
-.topbar-nav-btn:hover { background: rgba(255, 255, 255, 0.12); }
-.topbar-nav-btn svg { width: 18px; height: 18px; }
 
-/* Right: user */
+.topbar-nav-btn:hover {
+  background: var(--color-surface-high);
+  color: var(--color-on-surface);
+}
+
+/* ── Right: search + user pill ────────────────────────────────── */
 .topbar-right {
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-.topbar-user { position: relative; }
+.topbar-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: none;
+  color: var(--color-on-surface-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.topbar-icon-btn:hover {
+  background: var(--color-surface-high);
+  color: var(--color-primary);
+}
+
+/* ── User pill button ─────────────────────────────────────────── */
+.topbar-user {
+  position: relative;
+}
 
 .topbar-user-btn {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  background: rgba(0, 0, 0, 0.6);
-  border: none;
-  border-radius: 23px;
-  padding: 4px 10px 4px 4px;
-  color: #fff;
+  background: var(--color-surface);
+  border: var(--glass-border);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+  color: var(--color-on-surface);
+  font-family: var(--font-ui);
   font-size: var(--text-sm);
-  font-weight: var(--font-bold);
+  font-weight: var(--weight-medium);
   cursor: pointer;
-  transition: background var(--duration-base);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
 }
-.topbar-user-btn:hover { background: rgba(255, 255, 255, 0.1); }
+
+.topbar-user-btn:hover {
+  background: var(--color-surface-high);
+  box-shadow: var(--shadow-xs);
+}
 
 .topbar-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--color-brand);
-  color: #000;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-muted);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
-  font-weight: var(--font-bold);
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
   flex-shrink: 0;
+  letter-spacing: 0;
 }
 
 .topbar-username {
@@ -83,68 +131,91 @@
   white-space: nowrap;
 }
 
-/* Dropdown */
+/* ── Dropdown glass panel ─────────────────────────────────────── */
 .topbar-dropdown {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + var(--space-2));
   right: 0;
-  min-width: 200px;
-  background: #282828;
-  border-radius: var(--radius-lg);
+  min-width: 220px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  border-radius: var(--radius-xl);
   padding: var(--space-1);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  box-shadow: var(--shadow-lg);
   z-index: var(--z-dropdown);
-  animation: topbarDdIn var(--duration-base) var(--ease-default);
+  animation: topbar-dd-in var(--transition-base) both;
 }
-@keyframes topbarDdIn {
+
+@keyframes topbar-dd-in {
   from { opacity: 0; transform: translateY(-6px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
 .topbar-dd-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 10px 14px 6px;
+  padding: var(--space-3) var(--space-4) var(--space-2);
 }
+
 .topbar-dd-name {
+  font-family: var(--font-ui);
   font-size: var(--text-sm);
-  font-weight: var(--font-bold);
-  color: #fff;
+  font-weight: var(--weight-semibold);
+  color: var(--color-on-surface);
 }
+
 .topbar-dd-email {
+  font-family: var(--font-ui);
   font-size: var(--text-xs);
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-on-surface-variant);
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .topbar-dd-sep {
   height: 1px;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--color-outline-variant);
   margin: var(--space-1) 0;
 }
 
 .topbar-dd-item {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
+  height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-lg);
   text-decoration: none;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--color-on-surface);
+  font-family: var(--font-ui);
   font-size: var(--text-sm);
-  font-weight: var(--font-medium);
+  font-weight: var(--weight-medium);
   background: none;
   border: none;
   text-align: left;
   cursor: pointer;
-  transition: background var(--duration-fast), color var(--duration-fast);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  box-sizing: border-box;
 }
-.topbar-dd-item:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
-.topbar-dd-item.danger { color: rgba(255, 255, 255, 0.8); }
-.topbar-dd-item.danger:hover { background: rgba(224, 82, 96, 0.1); color: #ff6b78; }
 
-/* Mobile: hide back/forward nav */
+.topbar-dd-item:hover {
+  background: rgba(166, 51, 27, 0.06);
+  color: var(--color-primary);
+}
+
+.topbar-dd-item.danger {
+  color: var(--color-error);
+}
+
+.topbar-dd-item.danger:hover {
+  background: rgba(186, 26, 26, 0.06);
+  color: var(--color-error);
+}
+
+/* ── Mobile ───────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .topbar { padding: 0 var(--space-4); }
   .topbar-left { display: none; }

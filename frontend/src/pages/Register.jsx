@@ -8,7 +8,6 @@ import { AUTH_URL } from "../config.js";
 export default function Register() {
   const navigate = useNavigate();
   const { setUser } = useAuth();
-
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -53,124 +52,197 @@ export default function Register() {
   }
 
   return (
-    <div className="auth-page">
-      <div className="auth-card auth-card-wide">
-        <div className="auth-header">
-          <SpotifyIcon />
-          <h1 className="auth-title">Create your account</h1>
-        </div>
+    <div className="auth-root">
+      <AuthPanel />
 
-        <button
-          type="button"
-          className="btn-google"
-          onClick={() => { window.location.href = `${AUTH_URL}/api/auth/google`; }}
-        >
-          <GoogleIcon />
-          Continue with Google
-        </button>
+      <div className="auth-right">
+        <div className="auth-box">
+          <h1 className="auth-heading">Create an account</h1>
+          <p className="auth-subhead">Join and start your musical journey.</p>
 
-        <div className="auth-divider"><span>or</span></div>
+          <button
+            type="button"
+            className="auth-google-btn"
+            onClick={() => { window.location.href = `${AUTH_URL}/api/auth/google`; }}
+          >
+            <GoogleIcon />
+            Continue with Google
+          </button>
 
-        {error && <div className="auth-error">{error}</div>}
+          <div className="auth-or"><span>or</span></div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          {/* Role selector */}
-          <div className="role-group">
-            <span className="role-label">I am a</span>
-            <div className="role-options">
-              <label className={`role-option ${form.role === "user" ? "selected" : ""}`}>
-                <input type="radio" name="role" value="user" checked={form.role === "user"} onChange={handleChange} />
-                <UserIcon />
-                <span>Listener</span>
-              </label>
-              <label className={`role-option ${form.role === "artist" ? "selected" : ""}`}>
-                <input type="radio" name="role" value="artist" checked={form.role === "artist"} onChange={handleChange} />
-                <ArtistIcon />
-                <span>Artist</span>
-              </label>
+          {error && (
+            <div className="auth-error" role="alert">
+              <WarnIcon />
+              {error}
             </div>
-          </div>
+          )}
 
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="firstName">First name</label>
-              <input
-                id="firstName"
+          <form className="auth-form" onSubmit={handleSubmit}>
+            {/* Role selector */}
+            <div className="auth-role-wrap">
+              <p className="auth-role-label">I want to</p>
+              <div className="auth-role-cards">
+                <label className={`auth-role-card${form.role === "user" ? " selected" : ""}`}>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="user"
+                    checked={form.role === "user"}
+                    onChange={handleChange}
+                  />
+                  <HeadphonesIcon />
+                  <span>Listen</span>
+                </label>
+                <label className={`auth-role-card${form.role === "artist" ? " selected" : ""}`}>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="artist"
+                    checked={form.role === "artist"}
+                    onChange={handleChange}
+                  />
+                  <MicIcon />
+                  <span>Create</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Name row */}
+            <div className="auth-form-row">
+              <FloatField
+                id="reg-first"
                 name="firstName"
                 type="text"
-                placeholder="John"
+                label="First name"
                 autoComplete="given-name"
                 value={form.firstName}
                 onChange={handleChange}
                 required
               />
-            </div>
-            <div className="form-group">
-              <label htmlFor="lastName">Last name</label>
-              <input
-                id="lastName"
+              <FloatField
+                id="reg-last"
                 name="lastName"
                 type="text"
-                placeholder="Doe"
+                label="Last name"
                 autoComplete="family-name"
                 value={form.lastName}
                 onChange={handleChange}
                 required
               />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="reg-email">Email address</label>
-            <input
+            <FloatField
               id="reg-email"
               name="email"
               type="email"
-              placeholder="you@example.com"
+              label="Email address"
               autoComplete="email"
               value={form.email}
               onChange={handleChange}
               required
             />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="reg-password">Password</label>
-            <input
+            <FloatField
               id="reg-password"
               name="password"
               type="password"
-              placeholder="Create a strong password"
+              label="Password"
               autoComplete="new-password"
               value={form.password}
               onChange={handleChange}
               required
             />
-          </div>
 
-          <button type="submit" className="btn-submit" disabled={loading}>
-            {loading ? "Creating account…" : "Create account"}
-          </button>
-        </form>
+            <button type="submit" className="auth-submit" disabled={loading}>
+              {loading ? "Creating account…" : "Create account"}
+            </button>
+          </form>
 
-        <p className="auth-footer">
-          Already have an account? <Link to="/login">Log in</Link>
-        </p>
+          <p className="auth-footer">
+            Already have an account?{" "}
+            <Link to="/login">Sign in</Link>
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
-function SpotifyIcon() {
+/* ── Shared sub-components ────────────────────────────────────── */
+
+function AuthPanel() {
   return (
-    <svg className="auth-logo" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
+    <div className="auth-panel" aria-hidden="true">
+      <div className="auth-panel-inner">
+        <WaveformIllustration />
+        <blockquote className="auth-panel-quote">
+          "Music is the shorthand of emotion."
+          <cite className="auth-panel-cite">— Leo Tolstoy</cite>
+        </blockquote>
+      </div>
+      <div className="auth-brand">
+        <LuminaMark />
+        <span className="auth-brand-name">Lumina</span>
+      </div>
+    </div>
+  );
+}
+
+function FloatField({ id, name, type, label, autoComplete, value, onChange, required }) {
+  return (
+    <div className="fl-group">
+      <input
+        id={id}
+        name={name}
+        type={type}
+        placeholder=" "
+        autoComplete={autoComplete}
+        value={value}
+        onChange={onChange}
+        className="fl-input"
+        required={required}
+      />
+      <label htmlFor={id} className="fl-label">{label}</label>
+    </div>
+  );
+}
+
+function WaveformIllustration() {
+  const bars = [22, 45, 62, 80, 72, 90, 76, 55, 88, 95, 82, 68, 58, 78, 66, 44, 72, 55, 35, 18];
+  return (
+    <svg
+      className="auth-waveform"
+      viewBox="0 0 177 80"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      {bars.map((h, i) => (
+        <rect
+          key={i}
+          x={i * 9}
+          y={(80 - h * 0.8) / 2}
+          width={6}
+          height={h * 0.8}
+          rx={3}
+        />
+      ))}
     </svg>
   );
 }
+
+function LuminaMark() {
+  return (
+    <svg className="auth-mark" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+      <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+      <circle cx="12" cy="12" r="6.5" stroke="currentColor" strokeWidth="0.75" strokeDasharray="2.5 2" />
+    </svg>
+  );
+}
+
 function GoogleIcon() {
   return (
-    <svg className="google-icon" viewBox="0 0 24 24">
+    <svg className="auth-google-icon" viewBox="0 0 24 24" aria-hidden="true">
       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
       <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" />
@@ -178,17 +250,34 @@ function GoogleIcon() {
     </svg>
   );
 }
-function UserIcon() {
+
+function WarnIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-      <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z" />
+    <svg className="auth-warn-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <path d="M10 3.5L17.3 16.5H2.7L10 3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
+      <line x1="10" y1="9" x2="10" y2="12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <circle cx="10" cy="14.5" r="0.75" fill="currentColor" />
     </svg>
   );
 }
-function ArtistIcon() {
+
+function HeadphonesIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-      <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6z" />
+    <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true">
+      <path d="M3 18v-6a9 9 0 0 1 18 0v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <rect x="17" y="14" width="4" height="6" rx="2" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="3" y="14" width="4" height="6" rx="2" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function MicIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true">
+      <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5 10v2a7 7 0 0 0 14 0v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="12" y1="19" x2="12" y2="22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="8" y1="22" x2="16" y2="22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }

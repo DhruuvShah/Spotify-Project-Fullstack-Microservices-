@@ -1,21 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { usePlayer } from "../context/PlayerContext";
+import {
+  PlayIcon, PauseIcon, PrevIcon, NextIcon,
+  ShuffleIcon, RepeatIcon, RepeatOneIcon,
+  HeartIcon, MuteIcon, VolLowIcon, VolHighIcon,
+  QueueIcon, MusicNoteIcon,
+} from "./icons/index.jsx";
 import "./BottomPlayer.css";
 
 function fmt(s) {
   if (!s || isNaN(s)) return "0:00";
-  const m = Math.floor(s / 60);
+  const m   = Math.floor(s / 60);
   const sec = Math.floor(s % 60);
   return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
-function QueueCover({ src, alt }) {
+function QueueTrackCover({ src, alt }) {
   const [err, setErr] = useState(false);
   if (!src || err) {
     return (
-      <div className="bp-queue-cover bp-queue-cover-fallback">
-        <MusicNoteIcon />
+      <div className="bp-queue-cover bp-queue-cover--fallback">
+        <MusicNoteIcon width={16} height={16} />
       </div>
     );
   }
@@ -25,6 +31,7 @@ function QueueCover({ src, alt }) {
       alt={alt}
       className="bp-queue-cover"
       onError={() => setErr(true)}
+      loading="lazy"
     />
   );
 }
@@ -33,39 +40,92 @@ export default function BottomPlayer() {
   const location = useLocation();
   const navigate = useNavigate();
   const {
-    currentTrack,
-    queue,
-    queueIndex,
-    playing,
-    currentTime,
-    duration,
-    volume,
-    muted,
-    likedIds,
-    togglePlay,
-    next,
-    prev,
-    seek,
-    changeVolume,
-    toggleMute,
-    toggleLike,
-    playTrack,
+    currentTrack, queue, queueIndex, playing,
+    currentTime, duration, volume, muted, likedIds,
+    repeat, shuffle,
+    togglePlay, next, prev, seek, changeVolume, toggleMute,
+    toggleLike, toggleRepeat, toggleShuffle, playTrack,
   } = usePlayer();
 
   const [showQueue, setShowQueue] = useState(false);
-  const [imgErr, setImgErr] = useState(false);
+  const [imgErr,    setImgErr]    = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
+  const progressRef = useRef(null);
+  const dragging    = useRef(false);
+
+  useEffect(() => { setImgErr(false); }, [currentTrack?.id]);
+
+  // Global keyboard shortcuts — only when no input is focused
   useEffect(() => {
-    setImgErr(false);
-  }, [currentTrack?.id]);
+    function onKey(e) {
+      const tag = document.activeElement?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      if (document.activeElement?.isContentEditable) return;
+      if (!currentTrack) return;
+      switch (e.key) {
+        case " ":
+          e.preventDefault();
+          togglePlay();
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          seek(Math.max(0, currentTime - 5));
+          break;
+        case "ArrowRight":
+          e.preventDefault();
+          seek(Math.min(duration || 0, currentTime + 5));
+          break;
+        case "m":
+        case "M":
+          toggleMute();
+          break;
+        case "n":
+        case "N":
+          next();
+          break;
+        case "p":
+        case "P":
+          prev();
+          break;
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [currentTrack, currentTime, duration, togglePlay, seek, toggleMute, next, prev]);
 
-  // Hide on the full-screen player page (it has its own controls)
   const isOnPlayer = location.pathname.startsWith("/music/");
   if (!currentTrack || isOnPlayer) return null;
 
-  const pct = duration ? `${(currentTime / duration) * 100}%` : "0%";
-  const volPct = `${(muted ? 0 : volume) * 100}%`;
+  const pct     = duration > 0 ? `${(currentTime / duration) * 100}%` : "0%";
   const isLiked = likedIds.has(currentTrack.id);
+
+  // ── Custom progress bar pointer handlers ─────────────────────
+  function computeSeekTime(e) {
+    const rect = progressRef.current.getBoundingClientRect();
+    const frac = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    return frac * (duration || 0);
+  }
+
+  function onProgressDown(e) {
+    if (!duration) return;
+    dragging.current = true;
+    setIsDragging(true);
+    progressRef.current.setPointerCapture(e.pointerId);
+    seek(computeSeekTime(e));
+  }
+
+  function onProgressMove(e) {
+    if (!dragging.current || !duration) return;
+    seek(computeSeekTime(e));
+  }
+
+  function onProgressUp(e) {
+    if (!dragging.current) return;
+    dragging.current = false;
+    setIsDragging(false);
+    seek(computeSeekTime(e));
+  }
 
   function goToPlayer() {
     navigate(`/music/${currentTrack.id}`);
@@ -74,10 +134,14 @@ export default function BottomPlayer() {
 
   return (
     <>
+      {/* ── Queue panel — floats above the player ── */}
       {showQueue && (
-        <div className="bp-queue-panel">
+        <div className="bp-queue-panel" role="complementary" aria-label="Queue">
           <div className="bp-queue-header">
-            Queue &mdash; {queue.length} {queue.length === 1 ? "track" : "tracks"}
+            <span className="bp-queue-title-label">Queue</span>
+            <span className="bp-queue-count">
+              {queue.length} {queue.length === 1 ? "track" : "tracks"}
+            </span>
           </div>
           <div className="bp-queue-list">
             {queue.length === 0 ? (
@@ -86,16 +150,19 @@ export default function BottomPlayer() {
               queue.map((track, i) => (
                 <div
                   key={track.id + "-" + i}
-                  className={`bp-queue-item ${i === queueIndex ? "active" : ""}`}
+                  className={`bp-queue-item${i === queueIndex ? " active" : ""}`}
                   onClick={() => playTrack(track, queue)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === "Enter") playTrack(track, queue); }}
                 >
-                  <QueueCover src={track.coverImageUrl} alt={track.title} />
+                  <QueueTrackCover src={track.coverImageUrl} alt={track.title} />
                   <div className="bp-queue-info">
-                    <span className="bp-queue-title">{track.title}</span>
-                    <span className="bp-queue-artist">{track.artist}</span>
+                    <span className="bp-queue-track-name">{track.title}</span>
+                    <span className="bp-queue-track-artist">{track.artist}</span>
                   </div>
                   {i === queueIndex && (
-                    <span className="bp-queue-playing-dot" />
+                    <span className="bp-queue-dot" aria-label="Now playing" />
                   )}
                 </div>
               ))
@@ -105,199 +172,170 @@ export default function BottomPlayer() {
       )}
 
       <div className="bp-root">
-        {/* ── Left: track info ── */}
+        {/* ── Left: cover + info + heart ── */}
         <div className="bp-track">
-          {!imgErr && currentTrack.coverImageUrl ? (
-            <img
-              src={currentTrack.coverImageUrl}
-              alt={currentTrack.title}
-              className="bp-cover"
-              onClick={goToPlayer}
-              onError={() => setImgErr(true)}
-            />
-          ) : (
-            <div className="bp-cover bp-cover-fallback" onClick={goToPlayer}>
-              <MusicNoteIcon />
-            </div>
-          )}
-          <div className="bp-info">
-            <span className="bp-title" onClick={goToPlayer}>
-              {currentTrack.title}
-            </span>
-            <span className="bp-artist">{currentTrack.artist}</span>
-          </div>
           <button
-            className={`bp-like-btn${isLiked ? " liked" : ""}`}
-            onClick={() => toggleLike(currentTrack.id)}
-            title={isLiked ? "Unlike" : "Like"}
+            className="bp-cover-btn"
+            onClick={goToPlayer}
+            aria-label={`Open ${currentTrack.title}`}
           >
-            <HeartIcon filled={isLiked} />
-          </button>
-          {/* Mobile-only compact play/pause — bp-center is hidden on mobile */}
-          <button
-            className="bp-mobile-play"
-            onClick={togglePlay}
-            title={playing ? "Pause" : "Play"}
-            aria-label={playing ? "Pause" : "Play"}
-          >
-            {playing ? <PauseIcon /> : <PlayIcon />}
-          </button>
-        </div>
-
-        {/* ── Center: controls + seek ── */}
-        <div className="bp-center">
-          <div className="bp-controls">
-            <button className="bp-ctrl-btn" onClick={prev} title="Previous">
-              <PrevIcon />
-            </button>
-            <button className="bp-play-btn" onClick={togglePlay} title={playing ? "Pause" : "Play"}>
-              {playing ? <PauseIcon /> : <PlayIcon />}
-            </button>
-            <button className="bp-ctrl-btn" onClick={next} title="Next">
-              <NextIcon />
-            </button>
-          </div>
-          <div className="bp-progress">
-            <span className="bp-time">{fmt(currentTime)}</span>
-            <input
-              type="range"
-              className="bp-seek"
-              min={0}
-              max={duration || 1}
-              step={0.5}
-              value={currentTime}
-              onChange={(e) => seek(parseFloat(e.target.value))}
-              style={{ "--pct": pct }}
-            />
-            <span className="bp-time bp-time-right">{fmt(duration)}</span>
-          </div>
-        </div>
-
-        {/* ── Right: volume + queue ── */}
-        <div className="bp-right">
-          <button
-            className="bp-vol-btn"
-            onClick={toggleMute}
-            title={muted ? "Unmute" : "Mute"}
-          >
-            {muted || volume === 0 ? (
-              <MuteIcon />
-            ) : volume < 0.5 ? (
-              <VolLowIcon />
+            {!imgErr && currentTrack.coverImageUrl ? (
+              <img
+                src={currentTrack.coverImageUrl}
+                alt={currentTrack.title}
+                className="bp-cover"
+                onError={() => setImgErr(true)}
+              />
             ) : (
-              <VolHighIcon />
+              <div className="bp-cover bp-cover--fallback">
+                <MusicNoteIcon width={22} height={22} />
+              </div>
             )}
           </button>
-          <input
-            type="range"
-            className="bp-vol-slider"
-            min={0}
-            max={1}
-            step={0.01}
-            value={muted ? 0 : volume}
-            onChange={(e) => changeVolume(parseFloat(e.target.value))}
-            style={{ "--vol-pct": volPct }}
-          />
+
+          <div className="bp-info">
+            <button className="bp-title" onClick={goToPlayer}>
+              {currentTrack.title}
+            </button>
+            <span className="bp-artist">{currentTrack.artist}</span>
+          </div>
+
           <button
-            className={`bp-queue-btn${showQueue ? " active" : ""}`}
-            onClick={() => setShowQueue((s) => !s)}
-            title="Queue"
+            className={`bp-like-btn${isLiked ? " active" : ""}`}
+            onClick={() => toggleLike(currentTrack.id)}
+            aria-label={isLiked ? "Unlike" : "Like"}
+            aria-pressed={isLiked}
           >
-            <QueueIcon />
+            <HeartIcon filled={isLiked} width={18} height={18} />
           </button>
         </div>
+
+        {/* ── Center: controls + custom progress bar ── */}
+        <div className="bp-center">
+          <div className="bp-controls">
+            <button
+              className={`bp-ctrl-btn${shuffle ? " active" : ""}`}
+              onClick={toggleShuffle}
+              aria-label={shuffle ? "Shuffle on" : "Shuffle off"}
+              aria-pressed={shuffle}
+            >
+              <ShuffleIcon width={15} height={15} />
+            </button>
+
+            <button className="bp-ctrl-btn" onClick={prev} aria-label="Previous track">
+              <PrevIcon width={18} height={18} />
+            </button>
+
+            <button
+              className="bp-play-btn"
+              onClick={togglePlay}
+              aria-label={playing ? "Pause" : "Play"}
+            >
+              {playing
+                ? <PauseIcon width={17} height={17} />
+                : <PlayIcon  width={17} height={17} />}
+            </button>
+
+            <button className="bp-ctrl-btn" onClick={next} aria-label="Next track">
+              <NextIcon width={18} height={18} />
+            </button>
+
+            <button
+              className={`bp-ctrl-btn${repeat !== "off" ? " active" : ""}`}
+              onClick={toggleRepeat}
+              aria-label={
+                repeat === "off" ? "Repeat off"
+                : repeat === "all" ? "Repeat all"
+                : "Repeat one"
+              }
+              aria-pressed={repeat !== "off"}
+            >
+              {repeat === "one"
+                ? <RepeatOneIcon width={15} height={15} />
+                : <RepeatIcon    width={15} height={15} />}
+            </button>
+          </div>
+
+          {/* Custom div-based seek bar */}
+          <div className="bp-progress">
+            <span className="bp-time">{fmt(currentTime)}</span>
+
+            <div
+              ref={progressRef}
+              className={`bp-progress-track${isDragging ? " dragging" : ""}`}
+              onPointerDown={onProgressDown}
+              onPointerMove={onProgressMove}
+              onPointerUp={onProgressUp}
+              onPointerCancel={onProgressUp}
+              role="slider"
+              aria-label="Seek"
+              aria-valuemin={0}
+              aria-valuemax={Math.round(duration || 0)}
+              aria-valuenow={Math.round(currentTime)}
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowLeft")  seek(Math.max(0, currentTime - 5));
+                if (e.key === "ArrowRight") seek(Math.min(duration || 0, currentTime + 5));
+              }}
+            >
+              <div className="bp-progress-fill"  style={{ width: pct }} />
+              <div className="bp-progress-thumb" style={{ left: pct }} />
+            </div>
+
+            <span className="bp-time">{fmt(duration)}</span>
+          </div>
+        </div>
+
+        {/* ── Right: volume (hover reveal) + queue ── */}
+        <div className="bp-right">
+          <div className="bp-vol-wrap">
+            <button
+              className="bp-ctrl-btn"
+              onClick={toggleMute}
+              aria-label={muted ? "Unmute" : "Mute"}
+            >
+              {muted || volume === 0
+                ? <MuteIcon   width={18} height={18} />
+                : volume < 0.5
+                ? <VolLowIcon width={18} height={18} />
+                : <VolHighIcon width={18} height={18} />}
+            </button>
+            <div className="bp-vol-slider-wrap">
+              <input
+                type="range"
+                className="bp-vol-slider"
+                min={0}
+                max={1}
+                step={0.01}
+                value={muted ? 0 : volume}
+                onChange={(e) => changeVolume(parseFloat(e.target.value))}
+                aria-label="Volume"
+                style={{ "--vol-pct": `${(muted ? 0 : volume) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <button
+            className={`bp-ctrl-btn${showQueue ? " active" : ""}`}
+            onClick={() => setShowQueue((s) => !s)}
+            aria-label={showQueue ? "Hide queue" : "Show queue"}
+            aria-pressed={showQueue}
+          >
+            <QueueIcon width={18} height={18} />
+          </button>
+        </div>
+
+        {/* Mobile-only compact play/pause — center is hidden on mobile */}
+        <button
+          className="bp-mobile-play"
+          onClick={togglePlay}
+          aria-label={playing ? "Pause" : "Play"}
+        >
+          {playing
+            ? <PauseIcon width={14} height={14} />
+            : <PlayIcon  width={14} height={14} />}
+        </button>
       </div>
     </>
-  );
-}
-
-/* ── Icons ── */
-function HeartIcon({ filled }) {
-  return filled ? (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  ) : (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    </svg>
-  );
-}
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="5 3 19 12 5 21 5 3" />
-    </svg>
-  );
-}
-function PauseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <rect x="5" y="4" width="4" height="16" rx="1" />
-      <rect x="15" y="4" width="4" height="16" rx="1" />
-    </svg>
-  );
-}
-function PrevIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="19 20 9 12 19 4 19 20" />
-      <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-function NextIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="5 4 15 12 5 20 5 4" />
-      <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-function VolHighIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
-function VolLowIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
-function MuteIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-      <line x1="23" y1="9" x2="17" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      <line x1="17" y1="9" x2="23" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-function MusicNoteIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor">
-      <path d="M9 18V5l12-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="18" cy="16" r="3" />
-    </svg>
-  );
-}
-function QueueIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="8" y1="6" x2="21" y2="6" />
-      <line x1="8" y1="12" x2="21" y2="12" />
-      <line x1="8" y1="18" x2="21" y2="18" />
-      <line x1="3" y1="6" x2="3.01" y2="6" />
-      <line x1="3" y1="12" x2="3.01" y2="12" />
-      <line x1="3" y1="18" x2="3.01" y2="18" />
-    </svg>
   );
 }
