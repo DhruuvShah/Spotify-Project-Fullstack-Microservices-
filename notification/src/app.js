@@ -1,13 +1,20 @@
 import express from "express";
-import sendEmail from "./utils/email.js";
+import healthRouter from "./routes/health.routes.js";
+import notificationsRouter from "./routes/notifications.routes.js";
 
 const app = express();
 
-sendEmail(
-  "dhruv27Shah@gmail.com",
-  "Welcome to Spotify Premium!",
-  "Hello! We are excited to announce the launch of Spotify Premium, our new subscription service that offers ad-free music, offline listening, and exclusive content. Sign up now to enjoy the ultimate music experience!",
-  "<h1>Welcome to Spotify Premium! </h1>",
-);
+app.use(express.json());
+app.use(healthRouter);
+app.use(notificationsRouter);
+
+app.use((_req, res) => {
+  res.status(404).json({ error: "Not found" });
+});
+
+app.use((err, _req, res, _next) => {
+  console.error("Unhandled route error:", err.message);
+  res.status(500).json({ error: "Internal server error" });
+});
 
 export default app;
