@@ -262,6 +262,49 @@
   padding: var(--space-5) var(--space-6) var(--space-6);
 }
 
+/* ── ConfirmModal ────────────────────────────────────────────── */
+.confirm-msg {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  color: var(--color-on-surface-variant);
+  margin: 0 0 var(--space-5);
+  line-height: var(--leading-normal);
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+}
+
+.confirm-cancel {
+  padding: 9px 20px;
+  background: transparent;
+  border: 1.5px solid var(--color-outline-variant);
+  border-radius: var(--radius-md);
+  color: var(--color-on-surface-variant);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: border-color var(--transition-base), color var(--transition-base);
+}
+.confirm-cancel:hover { border-color: var(--color-outline); color: var(--color-on-surface); }
+
+.confirm-ok {
+  padding: 9px 20px;
+  background: var(--color-error);
+  border: none;
+  border-radius: var(--radius-md);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: opacity var(--transition-base);
+}
+.confirm-ok:hover { opacity: 0.88; }
+
 /* ── Toast ───────────────────────────────────────────────────── */
 .toast-container {
   position: fixed;

@@ -6,6 +6,7 @@ import { validateObjectId } from "../middlewares/validate.middleware.js";
 const router = express.Router();
 
 router.get("/likes", authUserMiddleware, likeController.getLikedMusicIds);
+router.get("/liked-tracks", authUserMiddleware, likeController.getLikedTracks);
 router.post("/like/:id", authUserMiddleware, validateObjectId("id"), likeController.likeMusic);
 router.delete("/like/:id", authUserMiddleware, validateObjectId("id"), likeController.unlikeMusic);
 

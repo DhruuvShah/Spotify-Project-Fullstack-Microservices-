@@ -1,4 +1,5 @@
 import likeModel from "../models/like.model.js";
+import { musicShape } from "../utils/musicShape.js";
 
 export async function likeMusic(req, res) {
   const { id } = req.params;
@@ -28,5 +29,20 @@ export async function getLikedMusicIds(req, res) {
     return res.status(200).json({ likedIds });
   } catch (error) {
     return res.status(500).json({ message: "Error fetching likes" });
+  }
+}
+
+export async function getLikedTracks(req, res) {
+  try {
+    const docs = await likeModel
+      .find({ userId: req.user.id })
+      .sort({ createdAt: -1 })
+      .populate("musicId");
+    const musics = docs
+      .map((d) => (d.musicId ? musicShape(d.musicId) : null))
+      .filter(Boolean);
+    return res.status(200).json({ musics });
+  } catch (error) {
+    return res.status(500).json({ message: "Error fetching liked tracks" });
   }
 }
