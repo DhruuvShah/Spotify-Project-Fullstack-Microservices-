@@ -10,8 +10,8 @@ import App from './App.jsx'
 // while the user reads the login page. A 404 or CORS error still wakes them.
 const authUrl = import.meta.env.VITE_AUTH_URL
 const musicUrl = import.meta.env.VITE_MUSIC_URL
-if (authUrl)  fetch(`${authUrl}/api/health`,  { method: 'GET', credentials: 'include' }).catch(() => {})
-if (musicUrl) fetch(`${musicUrl}/api/health`, { method: 'GET', credentials: 'include' }).catch(() => {})
+if (authUrl)  fetch(`${authUrl}/api/auth/me`,  { method: 'GET', credentials: 'include' }).catch(() => {})
+if (musicUrl) fetch(`${musicUrl}/health`, { method: 'GET', credentials: 'include' }).catch(() => {})
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
