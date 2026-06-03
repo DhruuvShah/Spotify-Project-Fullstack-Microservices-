@@ -2,7 +2,7 @@ import { config as dotenvConfig } from "dotenv";
 
 dotenvConfig();
 
-const REQUIRED = ["MONGO_URI", "JWT_SECRET", "IMAGEKIT_PRIVATE_KEY"];
+const REQUIRED = ["MONGO_URI", "JWT_SECRET", "IMAGEKIT_PUBLIC_KEY", "IMAGEKIT_PRIVATE_KEY", "IMAGEKIT_URL_ENDPOINT"];
 const missing = REQUIRED.filter((k) => !process.env[k]);
 if (missing.length) {
   throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
