@@ -29,7 +29,7 @@ describe("userCreatedHandler", () => {
     await userCreatedHandler(validMsg);
     expect(sendEmail).toHaveBeenCalledWith(
       "test@example.com",
-      "Welcome to Spotify!",
+      "Welcome to Lumina!",
       expect.stringContaining("<!DOCTYPE html>")
     );
   });

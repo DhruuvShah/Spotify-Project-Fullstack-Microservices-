@@ -22,7 +22,7 @@ transporter.verify((error) => {
 
 const sendEmail = async (to, subject, html) => {
   const info = await transporter.sendMail({
-    from: `"Spotify" <${config.EMAIL_USER}>`,
+    from: `"Lumina" <${config.EMAIL_USER}>`,
     to,
     subject,
     html,

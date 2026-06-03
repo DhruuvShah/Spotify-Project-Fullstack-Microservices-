@@ -25,10 +25,10 @@ describe("welcomeTemplate", () => {
     expect(artist).toContain("Artist");
   });
 
-  it("includes Spotify branding and green accent color", () => {
+  it("includes Lumina branding and burnt orange accent color", () => {
     const html = welcomeTemplate({ firstName: "Dhruv", role: "user" });
-    expect(html).toContain("Spotify");
-    expect(html).toContain("#1DB954");
+    expect(html).toContain("Lumina");
+    expect(html).toContain("#c84b31");
   });
 
   it("includes the current year in the footer", () => {

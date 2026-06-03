@@ -14,7 +14,7 @@ export async function userCreatedHandler(msg) {
   const html = welcomeTemplate({ firstName: fullname.firstName, role });
 
   try {
-    const info = await sendEmail(email, "Welcome to Spotify!", html);
+    const info = await sendEmail(email, "Welcome to Lumina!", html);
     await Notification.create({
       recipientEmail: email,
       type: "welcome",

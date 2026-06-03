@@ -3,7 +3,7 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { musicService } from "../services/music.service.js";
 import {
-  MusicNoteIcon, HomeIcon, SearchIcon, StudioIcon,
+  HomeIcon, SearchIcon, StudioIcon,
   PlusIcon, HeartIcon, PlaylistIcon, LogoutIcon,
 } from "./icons/index.jsx";
 import "./Sidebar.css";
@@ -62,9 +62,7 @@ export default function Sidebar() {
     <aside className="sidebar">
       {/* ── Logo ── */}
       <Link to="/" className="sidebar-logo" aria-label="LUMINA — go home">
-        <span className="sidebar-logo-icon" aria-hidden="true">
-          <MusicNoteIcon width={22} height={22} />
-        </span>
+        <img src="/lumina.svg" alt="" className="sidebar-logo-img" aria-hidden="true" width={28} height={28} />
         <span className="sidebar-logo-text">LUMINA</span>
       </Link>
 

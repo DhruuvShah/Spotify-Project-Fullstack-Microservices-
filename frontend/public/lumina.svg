@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36">
+  <!-- Burnt orange circle -->
+  <circle cx="18" cy="18" r="18" fill="#c84b31"/>
+  <!-- Subtle inner ring for depth -->
+  <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.14)" stroke-width="1.5"/>
+  <!-- Quarter note head -->
+  <ellipse cx="14" cy="25" rx="5.5" ry="4" fill="#f9f9f6" transform="rotate(-15 14 25)"/>
+  <!-- Stem -->
+  <rect x="19" y="8.5" width="2.5" height="17" rx="1.25" fill="#f9f9f6"/>
+</svg>
