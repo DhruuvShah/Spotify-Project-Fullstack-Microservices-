@@ -44,7 +44,7 @@ function initSocketServer(httpServer) {
   const io = new Server(httpServer, {
     maxHttpBufferSize: 1e4, // 10 KB per message
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:5173",
+      origin: (process.env.FRONTEND_URL || "http://localhost:5173").replace(/\/$/, ""),
       credentials: true,
     },
   });

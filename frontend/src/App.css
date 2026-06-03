@@ -12,6 +12,13 @@
   flex-direction: column;
   min-width: 0;
   overflow: hidden;
+  margin-left: var(--sidebar-w);
+}
+
+@media (max-width: 768px) {
+  .app-main {
+    margin-left: 0;
+  }
 }
 
 .app-scroll {
