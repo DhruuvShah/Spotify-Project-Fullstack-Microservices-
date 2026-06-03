@@ -51,7 +51,8 @@ function initSocketServer(httpServer) {
 
   io.use((socket, next) => {
     const cookies = cookie.parse(socket.handshake.headers.cookie || "");
-    const token = cookies.token;
+    // Bearer token from auth handshake (cross-origin production), cookie fallback (local dev)
+    const token = socket.handshake.auth?.token || cookies.token;
 
     if (!token)
       return next(new Error("Authentication error: No token provided"));

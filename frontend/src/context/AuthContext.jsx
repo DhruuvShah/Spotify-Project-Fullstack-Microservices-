@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 import { AUTH_URL } from "../config.js";
+import { tokenStore } from "../services/tokenStore.js";
 
 // Intercept 401s globally — clear user state so the app shows the login page
 axios.interceptors.response.use(
@@ -23,8 +24,14 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     axios
       .get(`${AUTH_URL}/api/auth/me`, { withCredentials: true })
-      .then((res) => setUser(res.data.user))
-      .catch(() => setUser(null))
+      .then((res) => {
+        if (res.data.token) tokenStore.set(res.data.token);
+        setUser(res.data.user);
+      })
+      .catch(() => {
+        tokenStore.clear();
+        setUser(null);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -34,6 +41,7 @@ export function AuthProvider({ children }) {
     } catch {
       // ignore network errors — cookie is cleared server-side
     }
+    tokenStore.clear();
     setUser(null);
   }
 

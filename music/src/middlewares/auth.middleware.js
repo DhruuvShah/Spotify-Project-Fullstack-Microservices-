@@ -3,7 +3,12 @@ import config from "../config/config.js";
 
 function authMiddleware(role = null) {
   return (req, res, next) => {
-    const token = req.cookies.token;
+    // Bearer header first (cross-origin production), cookie fallback (local dev)
+    const authHeader = req.headers.authorization;
+    const token =
+      (authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null) ||
+      req.cookies.token;
+
     if (!token) return res.status(401).json({ message: "Unauthorized" });
     try {
       const decoded = jwt.verify(token, config.JWT_SECRET);

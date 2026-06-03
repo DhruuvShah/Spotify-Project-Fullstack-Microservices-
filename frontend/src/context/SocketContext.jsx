@@ -3,6 +3,7 @@ import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { usePlayer } from "./PlayerContext";
 import { MUSIC_URL } from "../config.js";
+import { tokenStore } from "../services/tokenStore.js";
 
 const SocketContext = createContext(null);
 
@@ -20,7 +21,10 @@ export function SocketProvider({ children }) {
       return;
     }
 
-    const socket = io(MUSIC_URL, { withCredentials: true });
+    const socket = io(MUSIC_URL, {
+      withCredentials: true,
+      auth: { token: tokenStore.get() },
+    });
     socketRef.current = socket;
 
     socket.on("play", ({ track }) => {

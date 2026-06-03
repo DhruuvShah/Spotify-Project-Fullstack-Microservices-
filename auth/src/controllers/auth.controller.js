@@ -56,9 +56,11 @@ export async function register(req, res, next) {
       role: user.role,
     });
 
-    res.cookie("token", generateToken(user), COOKIE_OPTIONS);
+    const token = generateToken(user);
+    res.cookie("token", token, COOKIE_OPTIONS);
     return res.status(201).json({
       message: "User created successfully",
+      token,
       user: {
         id: user._id,
         email: user.email,
@@ -122,11 +124,14 @@ export async function me(req, res) {
     if (!user) return res.status(401).json({ message: "User not found" });
 
     const expiresAt = decoded.exp * 1000;
+    let activeToken = token;
     if (expiresAt - Date.now() < RENEW_THRESHOLD_MS) {
-      res.cookie("token", generateToken(user), COOKIE_OPTIONS);
+      activeToken = generateToken(user);
+      res.cookie("token", activeToken, COOKIE_OPTIONS);
     }
 
     return res.status(200).json({
+      token: activeToken,
       user: {
         id: user._id,
         email: user.email,
@@ -169,9 +174,11 @@ export async function login(req, res, next) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    res.cookie("token", generateToken(user), COOKIE_OPTIONS);
+    const token = generateToken(user);
+    res.cookie("token", token, COOKIE_OPTIONS);
     return res.status(200).json({
       message: "Login successful",
+      token,
       user: {
         id: user._id,
         email: user.email,

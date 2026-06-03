@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+import { tokenStore } from "../services/tokenStore.js";
 import "./Login.css";
 import { AUTH_URL } from "../config.js";
 
@@ -38,6 +39,7 @@ export default function Register() {
         },
         { withCredentials: true },
       );
+      if (res.data.token) tokenStore.set(res.data.token);
       setUser(res.data.user);
       if (res.data.user.role === "artist") {
         navigate("/artist/dashboard");
