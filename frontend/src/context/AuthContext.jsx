@@ -26,12 +26,14 @@ export function AuthProvider({ children }) {
     axios
       .get(`${AUTH_URL}/api/auth/me`, { withCredentials: true })
       .then((res) => {
-        const t = res.data.token ?? null;
-        tokenStore.set(t);
+        // Prefer token from server; fall back to a cached (non-expired) localStorage token
+        const t = res.data.token ?? tokenStore.get();
+        if (res.data.token) tokenStore.set(res.data.token);
         setToken(t);
         setUser(res.data.user);
       })
       .catch(() => {
+        // /me failed → session gone; purge everything
         tokenStore.clear();
         setToken(null);
         setUser(null);
