@@ -22,6 +22,7 @@ export function SocketProvider({ children }) {
     }
 
     const socket = io(MUSIC_URL, {
+      transports: ["polling"],
       withCredentials: true,
       auth: { token: tokenStore.get() },
     });
