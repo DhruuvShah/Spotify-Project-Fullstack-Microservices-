@@ -27,12 +27,18 @@ export function SocketProvider({ children }) {
     });
     socketRef.current = socket;
 
+    socket.on("connect", () => {
+      console.log("[LUMINA] socket connected, id:", socket.id);
+    });
+
     socket.on("play", ({ track }) => {
+      console.log("[LUMINA] play received, track:", track?.id);
       if (track) playTrack(track, [track]);
     });
 
     // Fired when reconnecting to an already-playing session (server sends last known state)
     socket.on("sync", ({ track }) => {
+      console.log("[LUMINA] sync received, track:", track?.id);
       if (track) playTrack(track, [track]);
     });
 
@@ -47,6 +53,7 @@ export function SocketProvider({ children }) {
   }, [user?.id, token]);
 
   function emitPlay(track) {
+    console.log("[LUMINA] emitPlay, socket:", !!socketRef.current, "track:", track?.id);
     socketRef.current?.emit("play", { track });
   }
 
