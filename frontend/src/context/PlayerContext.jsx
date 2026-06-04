@@ -206,7 +206,10 @@ export function PlayerProvider({ children }) {
     if (!audio) return;
     setDuration(audio.duration);
     audio.volume = muted ? 0 : volume;
-    audio.play().catch(() => {});
+    audio.play().catch(() => {
+      // Autoplay blocked by browser (no user gesture) — show paused state
+      setPlaying(false);
+    });
   }
 
   function handleEnded() {
