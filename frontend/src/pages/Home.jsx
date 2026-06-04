@@ -436,17 +436,6 @@ export default function Home() {
     ]).finally(() => setLoading(false));
   }, []);
 
-  // Re-fetch user playlists when another device creates/renames/deletes/modifies one
-  useEffect(() => {
-    function handler() {
-      axios.get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
-        .then((res) => setUserPlaylists(res.data.playlists))
-        .catch(() => {});
-    }
-    window.addEventListener("lumina:sync:playlists", handler);
-    return () => window.removeEventListener("lumina:sync:playlists", handler);
-  }, []);
-
   function handleCreated(pl)          { setUserPlaylists((p) => [pl, ...p]); }
   function handleDeleted(id)          { setUserPlaylists((p) => p.filter((x) => x._id !== id)); }
   function handleRenamed(id, newTitle) { setUserPlaylists((p) => p.map((x) => x._id === id ? { ...x, title: newTitle } : x)); }

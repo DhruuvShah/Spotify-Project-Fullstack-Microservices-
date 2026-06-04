@@ -3,7 +3,6 @@ import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 import cookie from "cookie";
 import logger from "../utils/logger.js";
-import { setIO } from "./io.js";
 
 // Per-user "now playing" state for reconnect sync
 const nowPlaying = new Map();
@@ -45,8 +44,6 @@ function initSocketServer(httpServer) {
       credentials: true,
     },
   });
-
-  setIO(io);
 
   io.use((socket, next) => {
     const cookies = cookie.parse(socket.handshake.headers.cookie || "");
@@ -93,11 +90,6 @@ function initSocketServer(httpServer) {
 
       nowPlaying.set(userId, payload);
       socket.broadcast.to(userId).emit("play", payload);
-    });
-
-    // Relay follow changes — auth service has no socket, client emits here instead
-    socket.on("sync:follows", (data) => {
-      socket.broadcast.to(userId).emit("sync:follows", data);
     });
 
     socket.on("error", (err) => {

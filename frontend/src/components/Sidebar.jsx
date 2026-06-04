@@ -32,15 +32,6 @@ export default function Sidebar() {
     musicService.getUserPlaylists().then(setPlaylists).catch(() => {});
   }, [user]);
 
-  // Re-fetch when another device creates/renames/deletes a playlist or adds/removes a song
-  useEffect(() => {
-    function handler() {
-      musicService.getUserPlaylists().then(setPlaylists).catch(() => {});
-    }
-    window.addEventListener("lumina:sync:playlists", handler);
-    return () => window.removeEventListener("lumina:sync:playlists", handler);
-  }, []);
-
   useEffect(() => {
     if (showCreate) inputRef.current?.focus();
   }, [showCreate]);

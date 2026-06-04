@@ -1,11 +1,6 @@
 import userPlaylistModel from "../models/userPlaylist.model.js";
 import { cacheGet, cacheSet, cacheDel } from "../utils/cache.js";
 import { populateMusics } from "../utils/populateMusics.js";
-import { getIO } from "../sockets/io.js";
-
-function emitPlaylistSync(userId) {
-  getIO()?.to(userId).emit("sync:playlists");
-}
 
 export async function createUserPlaylist(req, res) {
   const { title } = req.body;
@@ -18,7 +13,6 @@ export async function createUserPlaylist(req, res) {
       userId: req.user.id,
       musics: [],
     });
-    emitPlaylistSync(req.user.id);
     return res.status(201).json({ message: "Playlist created successfully", playlist });
   } catch (error) {
     req.log.error({ err: error }, "Error creating user playlist");
@@ -72,8 +66,6 @@ export async function addMusicToUserPlaylist(req, res) {
     await playlist.save();
 
     cacheDel(`user-playlist:${id}`);
-    emitPlaylistSync(req.user.id);
-
     return res.status(200).json({ message: "Song added to playlist" });
   } catch (error) {
     req.log.error({ err: error }, "Error adding to user playlist");
@@ -91,8 +83,6 @@ export async function removeMusicFromUserPlaylist(req, res) {
     await playlist.save();
 
     cacheDel(`user-playlist:${id}`);
-    emitPlaylistSync(req.user.id);
-
     return res.status(200).json({ message: "Song removed from playlist" });
   } catch (error) {
     req.log.error({ err: error }, "Error removing from user playlist");
@@ -115,8 +105,6 @@ export async function renameUserPlaylist(req, res) {
     if (!playlist) return res.status(404).json({ message: "Playlist not found" });
 
     cacheDel(`user-playlist:${id}`);
-    emitPlaylistSync(req.user.id);
-
     return res.status(200).json({ message: "Playlist renamed", playlist });
   } catch (error) {
     req.log.error({ err: error }, "Error renaming user playlist");
@@ -131,8 +119,6 @@ export async function deleteUserPlaylist(req, res) {
     if (result.deletedCount === 0) return res.status(404).json({ message: "Playlist not found" });
 
     cacheDel(`user-playlist:${id}`);
-    emitPlaylistSync(req.user.id);
-
     return res.status(200).json({ message: "Playlist deleted" });
   } catch (error) {
     req.log.error({ err: error }, "Error deleting user playlist");
