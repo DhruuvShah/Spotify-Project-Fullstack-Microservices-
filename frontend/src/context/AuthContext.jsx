@@ -19,17 +19,21 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios
       .get(`${AUTH_URL}/api/auth/me`, { withCredentials: true })
       .then((res) => {
-        if (res.data.token) tokenStore.set(res.data.token);
+        const t = res.data.token ?? null;
+        tokenStore.set(t);
+        setToken(t);
         setUser(res.data.user);
       })
       .catch(() => {
         tokenStore.clear();
+        setToken(null);
         setUser(null);
       })
       .finally(() => setLoading(false));
@@ -46,11 +50,12 @@ export function AuthProvider({ children }) {
       // ignore network errors — cookie is cleared server-side
     }
     tokenStore.clear();
+    setToken(null);
     setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout, setUser }}>
+    <AuthContext.Provider value={{ user, token, loading, logout, setUser, setToken }}>
       {children}
     </AuthContext.Provider>
   );

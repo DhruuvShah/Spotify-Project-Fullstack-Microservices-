@@ -3,17 +3,16 @@ import { io } from "socket.io-client";
 import { useAuth } from "./AuthContext";
 import { usePlayer } from "./PlayerContext";
 import { MUSIC_URL } from "../config.js";
-import { tokenStore } from "../services/tokenStore.js";
 
 const SocketContext = createContext(null);
 
 export function SocketProvider({ children }) {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { playTrack } = usePlayer();
   const socketRef = useRef(null);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !token) {
       if (socketRef.current) {
         socketRef.current.disconnect();
         socketRef.current = null;
@@ -24,7 +23,7 @@ export function SocketProvider({ children }) {
     const socket = io(MUSIC_URL, {
       transports: ["polling"],
       withCredentials: true,
-      auth: { token: tokenStore.get() },
+      auth: { token },
     });
     socketRef.current = socket;
 
@@ -40,7 +39,7 @@ export function SocketProvider({ children }) {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [user?.id]);
+  }, [user?.id, token]);
 
   function emitPlay(track) {
     socketRef.current?.emit("play", { track });

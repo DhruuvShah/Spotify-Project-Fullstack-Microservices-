@@ -8,7 +8,7 @@ import { AUTH_URL } from "../config.js";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { setUser, setToken } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,7 +28,9 @@ export default function Login() {
         { email: form.email, password: form.password },
         { withCredentials: true },
       );
-      if (res.data.token) tokenStore.set(res.data.token);
+      const t = res.data.token ?? null;
+      tokenStore.set(t);
+      setToken(t);
       setUser(res.data.user);
       if (res.data.user.role === "artist") {
         navigate("/artist/dashboard");

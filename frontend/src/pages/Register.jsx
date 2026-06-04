@@ -8,7 +8,7 @@ import { AUTH_URL } from "../config.js";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { setUser, setToken } = useAuth();
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -39,7 +39,9 @@ export default function Register() {
         },
         { withCredentials: true },
       );
-      if (res.data.token) tokenStore.set(res.data.token);
+      const t = res.data.token ?? null;
+      tokenStore.set(t);
+      setToken(t);
       setUser(res.data.user);
       if (res.data.user.role === "artist") {
         navigate("/artist/dashboard");
