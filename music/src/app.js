@@ -18,6 +18,11 @@ import analyticsRoutes from "./routes/analytics.routes.js";
 
 const app = express();
 
+// Render (and most cloud platforms) sit behind a reverse proxy; without this
+// Express reads the proxy's IP for every request — all users share one rate-limit
+// bucket and hit 429 almost immediately.
+app.set("trust proxy", 1);
+
 /* ── Security headers ── */
 app.use(helmet());
 
@@ -38,9 +43,11 @@ app.use(cookieParser());
 /* ── Rate limiting ── */
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  // Health checks fire on every page load; they must never consume quota.
+  skip: (req) => req.path === "/health",
   message: { message: "Too many requests, please try again later." },
 });
 
@@ -57,7 +64,8 @@ if (process.env.NODE_ENV !== "test") {
   app.use("/api/music/upload", uploadLimiter);
 }
 
-/* ── Health ── */
+/* ── Root + Health ── */
+app.get("/", (req, res) => res.status(200).json({ service: "music", status: "ok" }));
 app.get("/health", (req, res) => {
   const dbReady = mongoose.connection.readyState === 1;
   return res
