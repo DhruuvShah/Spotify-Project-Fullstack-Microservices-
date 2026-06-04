@@ -52,7 +52,7 @@ function initSocketServer(httpServer) {
 
     try {
       const decoded = jwt.verify(token, config.JWT_SECRET);
-      socket.user = { id: decoded.id, role: decoded.role, exp: decoded.exp };
+      socket.user = { id: decoded.id, role: decoded.role };
       next();
     } catch {
       return next(new Error("Authentication error: Invalid token"));
@@ -60,20 +60,10 @@ function initSocketServer(httpServer) {
   });
 
   io.on("connection", (socket) => {
-    const { id: userId, role, exp } = socket.user;
+    const { id: userId, role } = socket.user;
     logger.info({ userId, role }, "Socket connected");
 
     socket.join(userId);
-
-    // Disconnect automatically when the JWT expires
-    const msUntilExpiry = exp * 1000 - Date.now();
-    const expiryTimer =
-      msUntilExpiry > 0
-        ? setTimeout(() => {
-            logger.info({ userId }, "Socket disconnected: JWT expired");
-            socket.disconnect(true);
-          }, msUntilExpiry)
-        : null;
 
     // Sync current state to newly connected / reconnected device
     const current = nowPlaying.get(userId);
@@ -104,7 +94,6 @@ function initSocketServer(httpServer) {
     });
 
     socket.on("disconnect", () => {
-      if (expiryTimer) clearTimeout(expiryTimer);
       eventWindows.delete(socket.id);
 
       // Only clear stored state when the user's last device leaves
