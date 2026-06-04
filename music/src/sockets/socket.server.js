@@ -29,15 +29,11 @@ function isRateLimited(socketId) {
 function validatePlayPayload(data) {
   if (!data || typeof data !== "object" || Array.isArray(data)) return null;
 
-  const { musicId, position, timestamp, isPlaying } = data;
+  const { track } = data;
+  if (!track || typeof track !== "object" || Array.isArray(track)) return null;
+  if (typeof track._id !== "string" || !track._id.trim()) return null;
 
-  if (typeof musicId !== "string" || !musicId.trim()) return null;
-  if (typeof position !== "number" || position < 0 || position > 7200)
-    return null;
-  if (typeof timestamp !== "number" || timestamp <= 0) return null;
-  if (typeof isPlaying !== "boolean") return null;
-
-  return { musicId: musicId.trim(), position, timestamp, isPlaying };
+  return { track };
 }
 
 function initSocketServer(httpServer) {

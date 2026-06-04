@@ -21,13 +21,18 @@ export function SocketProvider({ children }) {
     }
 
     const socket = io(MUSIC_URL, {
-      transports: ["polling"],
+      transports: ["websocket", "polling"],
       withCredentials: true,
       auth: { token },
     });
     socketRef.current = socket;
 
     socket.on("play", ({ track }) => {
+      if (track) playTrack(track, [track]);
+    });
+
+    // Fired when reconnecting to an already-playing session (server sends last known state)
+    socket.on("sync", ({ track }) => {
       if (track) playTrack(track, [track]);
     });
 
