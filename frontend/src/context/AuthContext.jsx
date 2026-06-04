@@ -12,7 +12,7 @@ axios.interceptors.response.use(
       // AuthContext useEffect will have already set user to null on startup.
     }
     return Promise.reject(err);
-  }
+  },
 );
 
 const AuthContext = createContext(null);
@@ -37,7 +37,11 @@ export function AuthProvider({ children }) {
 
   async function logout() {
     try {
-      await axios.post(`${AUTH_URL}/api/auth/logout`, {}, { withCredentials: true });
+      await axios.post(
+        `${AUTH_URL}/api/auth/logout`,
+        {},
+        { withCredentials: true },
+      );
     } catch {
       // ignore network errors — cookie is cleared server-side
     }
