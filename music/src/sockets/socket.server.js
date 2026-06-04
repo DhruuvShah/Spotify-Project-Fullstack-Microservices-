@@ -86,10 +86,16 @@ function initSocketServer(httpServer) {
       if (isRateLimited(socket.id)) return;
 
       const payload = validatePlayPayload(data);
-      if (!payload) return;
+      if (!payload) {
+        socket.emit("play-ack", { status: "rejected" });
+        return;
+      }
 
       nowPlaying.set(userId, payload);
       socket.broadcast.to(userId).emit("play", payload);
+
+      const roomSize = io.sockets.adapter.rooms.get(userId)?.size ?? 0;
+      socket.emit("play-ack", { status: "ok", roomSize, userId });
     });
 
     socket.on("error", (err) => {

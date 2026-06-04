@@ -42,6 +42,10 @@ export function SocketProvider({ children }) {
       if (track) playTrack(track, [track]);
     });
 
+    socket.on("play-ack", (data) => {
+      console.log("[LUMINA] play-ack from server:", JSON.stringify(data));
+    });
+
     socket.on("connect_error", (err) => {
       console.error("Socket connection error:", err.message);
     });
