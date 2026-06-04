@@ -206,18 +206,24 @@ export function PlayerProvider({ children }) {
     if (!audio) return;
     setDuration(audio.duration);
     audio.volume = muted ? 0 : volume;
-    audio.play().catch(() => {
-      // Normal autoplay blocked — retry muted (browsers always allow muted autoplay)
-      audio.muted = true;
-      audio.play().then(() => {
-        // Restore the actual mute/volume state immediately after play starts
-        audio.muted = muted;
-        audio.volume = muted ? 0 : volume;
-      }).catch(() => {
+    // We don't call audio.play() here anymore, the useEffect below will handle it
+  }
+
+  // Sync the audio element's play/pause state with the React state
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio || !currentTrack) return;
+    
+    if (playing && audio.paused) {
+      audio.play().catch((err) => {
+        console.warn("[LUMINA] Autoplay blocked by browser:", err);
+        // If autoplay is blocked, revert the UI state to paused
         setPlaying(false);
       });
-    });
-  }
+    } else if (!playing && !audio.paused) {
+      audio.pause();
+    }
+  }, [playing, currentTrack]);
 
   function handleEnded() {
     const q  = queueRef.current;
