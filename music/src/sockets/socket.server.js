@@ -31,7 +31,7 @@ function validatePlayPayload(data) {
 
   const { track } = data;
   if (!track || typeof track !== "object" || Array.isArray(track)) return null;
-  if (typeof track._id !== "string" || !track._id.trim()) return null;
+  if (typeof track.id !== "string" || !track.id.trim()) return null;
 
   return { track };
 }
