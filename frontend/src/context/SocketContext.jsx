@@ -36,6 +36,11 @@ export function SocketProvider({ children }) {
       if (track) playTrack(track, [track]);
     });
 
+    // Data sync — bridge socket events into window custom events so any component can react
+    socket.on("sync:likes",     () => window.dispatchEvent(new CustomEvent("lumina:sync:likes")));
+    socket.on("sync:playlists", () => window.dispatchEvent(new CustomEvent("lumina:sync:playlists")));
+    socket.on("sync:follows",   () => window.dispatchEvent(new CustomEvent("lumina:sync:follows")));
+
     socket.on("connect_error", (err) => {
       console.error("Socket connection error:", err.message);
     });
@@ -50,8 +55,12 @@ export function SocketProvider({ children }) {
     socketRef.current?.emit("play", { track });
   }
 
+  function emitFollow(artistId, isFollowing) {
+    socketRef.current?.emit("sync:follows", { artistId, isFollowing });
+  }
+
   return (
-    <SocketContext.Provider value={{ emitPlay }}>
+    <SocketContext.Provider value={{ emitPlay, emitFollow }}>
       {children}
     </SocketContext.Provider>
   );

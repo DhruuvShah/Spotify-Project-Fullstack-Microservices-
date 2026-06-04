@@ -36,7 +36,7 @@ export default function ArtistProfile() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { playTrack, currentTrack } = usePlayer();
-  const { emitPlay } = useSocket();
+  const { emitPlay, emitFollow } = useSocket();
 
   const [artist, setArtist] = useState(null);
   const [musics, setMusics] = useState([]);
@@ -72,10 +72,12 @@ export default function ArtistProfile() {
         await axios.delete(`${AUTH_URL}/api/auth/follow/${artistId}`, { withCredentials: true });
         setFollowing(false);
         setArtist((a) => ({ ...a, followerCount: (a.followerCount ?? 1) - 1 }));
+        emitFollow(artistId, false);
       } else {
         await axios.post(`${AUTH_URL}/api/auth/follow/${artistId}`, {}, { withCredentials: true });
         setFollowing(true);
         setArtist((a) => ({ ...a, followerCount: (a.followerCount ?? 0) + 1 }));
+        emitFollow(artistId, true);
       }
     } catch {}
     setFollowLoading(false);

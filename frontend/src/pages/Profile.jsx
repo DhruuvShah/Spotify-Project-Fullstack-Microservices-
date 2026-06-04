@@ -89,6 +89,34 @@ export default function Profile() {
     }
   }, [user]);
 
+  // Re-sync when another device mutates follows, playlists, or likes
+  useEffect(() => {
+    function onFollows() {
+      axios.get(`${AUTH_URL}/api/auth/following`, { withCredentials: true })
+        .then((res) => setFollowedArtists(res.data.artists))
+        .catch(() => {});
+    }
+    function onPlaylists() {
+      axios.get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
+        .then((res) => setUserPlaylists(res.data.playlists))
+        .catch(() => {});
+    }
+    function onLikes() {
+      if (user?.role === "artist") return;
+      axios.get(`${MUSIC_URL}/api/music/liked-tracks`, { withCredentials: true })
+        .then((res) => setLikedTracks(res.data.musics ?? []))
+        .catch(() => {});
+    }
+    window.addEventListener("lumina:sync:follows",   onFollows);
+    window.addEventListener("lumina:sync:playlists", onPlaylists);
+    window.addEventListener("lumina:sync:likes",     onLikes);
+    return () => {
+      window.removeEventListener("lumina:sync:follows",   onFollows);
+      window.removeEventListener("lumina:sync:playlists", onPlaylists);
+      window.removeEventListener("lumina:sync:likes",     onLikes);
+    };
+  }, [user?.role]);
+
   async function handleLogout() {
     setLoggingOut(true);
     await logout();

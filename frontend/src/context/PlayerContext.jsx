@@ -64,6 +64,19 @@ export function PlayerProvider({ children }) {
       .catch(() => {});
   }, [user?.id]);
 
+  // Re-fetch liked IDs when another device likes/unlikes
+  useEffect(() => {
+    if (!user) return;
+    function handler() {
+      axios
+        .get(`${MUSIC_URL}/api/music/likes`, { withCredentials: true })
+        .then((res) => setLikedIds(new Set(res.data.likedIds)))
+        .catch(() => {});
+    }
+    window.addEventListener("lumina:sync:likes", handler);
+    return () => window.removeEventListener("lumina:sync:likes", handler);
+  }, [user?.id]);
+
   const playTrack = useCallback((track, allTracks = []) => {
     const norm    = normalize(track);
     const normAll = allTracks.length > 0 ? allTracks.map(normalize) : [norm];

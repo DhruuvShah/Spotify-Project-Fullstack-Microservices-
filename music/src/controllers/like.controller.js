@@ -1,10 +1,12 @@
 import likeModel from "../models/like.model.js";
 import { musicShape } from "../utils/musicShape.js";
+import { getIO } from "../sockets/io.js";
 
 export async function likeMusic(req, res) {
   const { id } = req.params;
   try {
     await likeModel.create({ userId: req.user.id, musicId: id });
+    getIO()?.to(req.user.id).emit("sync:likes");
     return res.status(201).json({ message: "Liked" });
   } catch (error) {
     if (error.code === 11000) return res.status(409).json({ message: "Already liked" });
@@ -16,6 +18,7 @@ export async function unlikeMusic(req, res) {
   const { id } = req.params;
   try {
     await likeModel.deleteOne({ userId: req.user.id, musicId: id });
+    getIO()?.to(req.user.id).emit("sync:likes");
     return res.status(200).json({ message: "Unliked" });
   } catch (error) {
     return res.status(500).json({ message: "Error unliking music" });
