@@ -28,26 +28,25 @@ export function SocketProvider({ children }) {
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("[LUMINA] socket connected, id:", socket.id);
+      console.log("[LUMINA] connected | socketId:", socket.id, "| userId:", user?.id);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.warn("[LUMINA] disconnected | reason:", reason);
     });
 
     socket.on("play", ({ track }) => {
-      console.log("[LUMINA] play received, track:", track?.id);
+      console.log("[LUMINA] play received | trackId:", track?.id);
       if (track) playTrack(track, [track]);
     });
 
-    // Fired when reconnecting to an already-playing session (server sends last known state)
     socket.on("sync", ({ track }) => {
-      console.log("[LUMINA] sync received, track:", track?.id);
+      console.log("[LUMINA] sync received | trackId:", track?.id);
       if (track) playTrack(track, [track]);
-    });
-
-    socket.on("play-ack", (data) => {
-      console.log("[LUMINA] play-ack from server:", JSON.stringify(data));
     });
 
     socket.on("connect_error", (err) => {
-      console.error("Socket connection error:", err.message);
+      console.error("[LUMINA] connect_error:", err.message);
     });
 
     return () => {
@@ -57,8 +56,14 @@ export function SocketProvider({ children }) {
   }, [user?.id, token]);
 
   function emitPlay(track) {
-    console.log("[LUMINA] emitPlay, socket:", !!socketRef.current, "track:", track?.id);
-    socketRef.current?.emit("play", { track });
+    if (!socketRef.current) {
+      console.warn("[LUMINA] emitPlay: no socket");
+      return;
+    }
+    console.log("[LUMINA] emitPlay | trackId:", track?.id, "| connected:", socketRef.current.connected);
+    socketRef.current.emit("play", { track }, (ack) => {
+      console.log("[LUMINA] server ack:", JSON.stringify(ack));
+    });
   }
 
   return (

@@ -28,11 +28,8 @@ function isRateLimited(socketId) {
 
 function validatePlayPayload(data) {
   if (!data || typeof data !== "object" || Array.isArray(data)) return null;
-
   const { track } = data;
   if (!track || typeof track !== "object" || Array.isArray(track)) return null;
-  if (typeof track.id !== "string" || !track.id.trim()) return null;
-
   return { track };
 }
 
@@ -82,12 +79,15 @@ function initSocketServer(httpServer) {
     const current = nowPlaying.get(userId);
     if (current) socket.emit("sync", current);
 
-    socket.on("play", (data) => {
-      if (isRateLimited(socket.id)) return;
+    socket.on("play", (data, ack) => {
+      if (isRateLimited(socket.id)) {
+        if (typeof ack === "function") ack({ status: "rate-limited" });
+        return;
+      }
 
       const payload = validatePlayPayload(data);
       if (!payload) {
-        socket.emit("play-ack", { status: "rejected" });
+        if (typeof ack === "function") ack({ status: "rejected" });
         return;
       }
 
@@ -95,7 +95,8 @@ function initSocketServer(httpServer) {
       socket.broadcast.to(userId).emit("play", payload);
 
       const roomSize = io.sockets.adapter.rooms.get(userId)?.size ?? 0;
-      socket.emit("play-ack", { status: "ok", roomSize, userId });
+      logger.info({ userId, roomSize }, "play broadcast");
+      if (typeof ack === "function") ack({ status: "ok", roomSize, userId });
     });
 
     socket.on("error", (err) => {
