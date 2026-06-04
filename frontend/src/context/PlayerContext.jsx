@@ -207,8 +207,15 @@ export function PlayerProvider({ children }) {
     setDuration(audio.duration);
     audio.volume = muted ? 0 : volume;
     audio.play().catch(() => {
-      // Autoplay blocked by browser (no user gesture) — show paused state
-      setPlaying(false);
+      // Normal autoplay blocked — retry muted (browsers always allow muted autoplay)
+      audio.muted = true;
+      audio.play().then(() => {
+        // Restore the actual mute/volume state immediately after play starts
+        audio.muted = muted;
+        audio.volume = muted ? 0 : volume;
+      }).catch(() => {
+        setPlaying(false);
+      });
     });
   }
 
