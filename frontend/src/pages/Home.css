@@ -413,6 +413,27 @@
   color: rgba(255, 255, 255, 0.5);
 }
 
+/* 2×2 cover collage */
+.hpc-collage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+.hpc-collage-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hpc-collage-empty {
+  width: 100%;
+  height: 100%;
+}
+
 .hpc-play-btn {
   position: absolute;
   bottom: 10px;

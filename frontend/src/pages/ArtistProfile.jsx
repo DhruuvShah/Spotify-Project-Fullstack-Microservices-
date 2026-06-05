@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Play, Music } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { usePlayer } from "../context/PlayerContext";
 import { useSocket } from "../context/SocketContext";
@@ -226,22 +227,6 @@ export default function ArtistProfile() {
   );
 }
 
-/* ── Icons ──────────────────────────────────────────────────────── */
-
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <polygon points="5 3 19 12 5 21 5 3" />
-    </svg>
-  );
-}
-
-function MusicNoteIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M9 18V5l12-2v13" />
-      <circle cx="6" cy="18" r="3" />
-      <circle cx="18" cy="16" r="3" />
-    </svg>
-  );
-}
+/* ── Icons — resolved via lucide-react imports at top ── */
+function PlayIcon()      { return <Play  aria-hidden="true" />; }
+function MusicNoteIcon() { return <Music aria-hidden="true" />; }

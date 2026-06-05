@@ -155,8 +155,9 @@ function PlaylistCard({ playlist, index }) {
   const navigate    = useNavigate();
   const { playTrack } = usePlayer();
   const { emitPlay }  = useSocket();
-  const gradient = PLAYLIST_GRADIENTS[index % PLAYLIST_GRADIENTS.length];
-  const count    = Array.isArray(playlist.musics) ? playlist.musics.length : 0;
+  const gradient    = PLAYLIST_GRADIENTS[index % PLAYLIST_GRADIENTS.length];
+  const count       = Array.isArray(playlist.musics) ? playlist.musics.length : 0;
+  const covers      = playlist.coverImages || [];
 
   function handlePlay(e) {
     e.stopPropagation();
@@ -177,8 +178,20 @@ function PlaylistCard({ playlist, index }) {
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === "Enter") navigate(`/playlist/${playlist.id ?? playlist._id}`); }}
     >
-      <div className="hpc-cover" style={{ background: gradient }}>
-        <PlaylistIcon width={32} height={32} />
+      <div className="hpc-cover" style={covers.length === 0 ? { background: gradient } : undefined}>
+        {covers.length > 0 ? (
+          <div className="hpc-collage">
+            {[0, 1, 2, 3].map((i) =>
+              covers[i] ? (
+                <img key={i} src={covers[i]} alt="" className="hpc-collage-img" loading="lazy" decoding="async" />
+              ) : (
+                <div key={i} className="hpc-collage-empty" style={{ background: gradient }} />
+              )
+            )}
+          </div>
+        ) : (
+          <PlaylistIcon width={32} height={32} />
+        )}
         <button className="hpc-play-btn" onClick={handlePlay} aria-label="Play playlist">
           <PlayIcon width={16} height={16} />
         </button>
@@ -205,6 +218,7 @@ function UserPlaylistCard({ playlist, index, onDelete, onRename }) {
   const [confirmOpen,   setConfirmOpen]   = useState(false);
   const gradient = PLAYLIST_GRADIENTS[(index + 4) % PLAYLIST_GRADIENTS.length];
   const count    = Array.isArray(playlist.musics) ? playlist.musics.length : 0;
+  const covers   = playlist.coverImages || [];
   const renameRef = useRef(null);
 
   useEffect(() => {
@@ -258,8 +272,20 @@ function UserPlaylistCard({ playlist, index, onDelete, onRename }) {
         tabIndex={0}
         onKeyDown={(e) => { if (e.key === "Enter") navigate(`/user-playlist/${playlist._id}`); }}
       >
-        <div className="hpc-cover" style={{ background: gradient }}>
-          <PlaylistIcon width={32} height={32} />
+        <div className="hpc-cover" style={covers.length === 0 ? { background: gradient } : undefined}>
+          {covers.length > 0 ? (
+            <div className="hpc-collage">
+              {[0, 1, 2, 3].map((i) =>
+                covers[i] ? (
+                  <img key={i} src={covers[i]} alt="" className="hpc-collage-img" loading="lazy" decoding="async" />
+                ) : (
+                  <div key={i} className="hpc-collage-empty" style={{ background: gradient }} />
+                )
+              )}
+            </div>
+          ) : (
+            <PlaylistIcon width={32} height={32} />
+          )}
           <button className="hpc-play-btn" onClick={handlePlay} aria-label="Play playlist">
             <PlayIcon width={16} height={16} />
           </button>
@@ -422,10 +448,11 @@ export default function Home() {
         .then((res) =>
           setPlaylists(
             res.data.playlists.map((p) => ({
-              id:     p._id,
-              title:  p.title,
-              artist: p.artist,
-              musics: p.musics,
+              id:          p._id,
+              title:       p.title,
+              artist:      p.artist,
+              musics:      p.musics,
+              coverImages: p.coverImages || [],
             }))
           )
         ),

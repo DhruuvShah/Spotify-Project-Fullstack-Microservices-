@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AlertTriangle, Headphones, Mic } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { tokenStore } from "../services/tokenStore.js";
 import "./Login.css";
@@ -255,33 +256,6 @@ function GoogleIcon() {
   );
 }
 
-function WarnIcon() {
-  return (
-    <svg className="auth-warn-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M10 3.5L17.3 16.5H2.7L10 3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <line x1="10" y1="9" x2="10" y2="12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="10" cy="14.5" r="0.75" fill="currentColor" />
-    </svg>
-  );
-}
-
-function HeadphonesIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true">
-      <path d="M3 18v-6a9 9 0 0 1 18 0v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <rect x="17" y="14" width="4" height="6" rx="2" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="3" y="14" width="4" height="6" rx="2" stroke="currentColor" strokeWidth="1.5" />
-    </svg>
-  );
-}
-
-function MicIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" width="22" height="22" aria-hidden="true">
-      <rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M5 10v2a7 7 0 0 0 14 0v-2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="12" y1="19" x2="12" y2="22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="8" y1="22" x2="16" y2="22" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
+function WarnIcon()       { return <AlertTriangle className="auth-warn-icon" size={16} aria-hidden="true" />; }
+function HeadphonesIcon() { return <Headphones size={22} aria-hidden="true" />; }
+function MicIcon()        { return <Mic size={22} aria-hidden="true" />; }

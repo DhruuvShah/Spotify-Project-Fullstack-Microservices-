@@ -1,4 +1,5 @@
 import userPlaylistModel from "../models/userPlaylist.model.js";
+import musicModel from "../models/music.Model.js";
 import { cacheGet, cacheSet, cacheDel } from "../utils/cache.js";
 import { populateMusics } from "../utils/populateMusics.js";
 
@@ -22,7 +23,19 @@ export async function createUserPlaylist(req, res) {
 
 export async function getUserPlaylists(req, res) {
   try {
-    const playlists = await userPlaylistModel.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    const docs = await userPlaylistModel.find({ userId: req.user.id }).sort({ createdAt: -1 });
+
+    const allIds = [...new Set(docs.flatMap((pl) => pl.musics.slice(0, 4).map((id) => id.toString())))];
+    const coverDocs = allIds.length > 0
+      ? await musicModel.find({ _id: { $in: allIds } }, { coverImageUrl: 1 })
+      : [];
+    const coverMap = new Map(coverDocs.map((d) => [d._id.toString(), d.coverImageUrl]));
+
+    const playlists = docs.map((pl) => ({
+      ...pl.toObject(),
+      coverImages: pl.musics.slice(0, 4).map((id) => coverMap.get(id.toString())).filter(Boolean),
+    }));
+
     return res.status(200).json({ playlists });
   } catch (error) {
     req.log.error({ err: error }, "Error fetching user playlists");

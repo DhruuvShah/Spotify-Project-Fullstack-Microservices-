@@ -28,12 +28,27 @@ export async function createPlaylist(req, res) {
 }
 
 export async function getPlaylists(req, res) {
-  const cached = cacheGet("playlists:all");
+  const cached = cacheGet("playlists:all:v2");
   if (cached !== undefined) return res.status(200).json({ playlists: cached });
 
   try {
-    const playlists = await playlistModel.find().sort({ createdAt: -1 }).limit(50);
-    cacheSet("playlists:all", playlists, 120);
+    const docs = await playlistModel.find().sort({ createdAt: -1 }).limit(50);
+
+    const allIds = [...new Set(docs.flatMap((pl) => pl.musics.slice(0, 4).map((id) => id.toString())))];
+    const coverDocs = allIds.length > 0
+      ? await musicModel.find({ _id: { $in: allIds } }, { coverImageUrl: 1 })
+      : [];
+    const coverMap = new Map(coverDocs.map((d) => [d._id.toString(), d.coverImageUrl]));
+
+    const playlists = docs.map((pl) => ({
+      _id: pl._id,
+      title: pl.title,
+      artist: pl.artist,
+      musics: pl.musics,
+      coverImages: pl.musics.slice(0, 4).map((id) => coverMap.get(id.toString())).filter(Boolean),
+    }));
+
+    cacheSet("playlists:all:v2", playlists, 120);
     return res.status(200).json({ playlists });
   } catch (error) {
     req.log.error({ err: error }, "Error fetching playlists");

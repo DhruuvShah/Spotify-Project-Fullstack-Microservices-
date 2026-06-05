@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import axios from "axios";
+import { Plus, ListMusic, Check } from "lucide-react";
 import "./AddToPlaylistBtn.css";
 import { MUSIC_URL } from "../config.js";
 
@@ -81,7 +82,7 @@ export default function AddToPlaylistBtn({ musicId }) {
         title="Add to playlist"
         onClick={handleToggle}
       >
-        <PlusListIcon />
+        <Plus width={14} height={14} aria-hidden />
       </button>
 
       {createPortal(
@@ -98,7 +99,7 @@ export default function AddToPlaylistBtn({ musicId }) {
                 className={`atp-item${addedId === pl._id ? " added" : ""}`}
                 onClick={(e) => { e.stopPropagation(); if (!addedId) handleAdd(pl._id); }}
               >
-                {addedId === pl._id ? <CheckIcon /> : <ListIcon />}
+                {addedId === pl._id ? <Check width={14} height={14} aria-hidden /> : <ListMusic width={14} height={14} aria-hidden />}
                 <span className="atp-item-name">{pl.title}</span>
               </button>
             ))}
@@ -110,30 +111,3 @@ export default function AddToPlaylistBtn({ musicId }) {
   );
 }
 
-function PlusListIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-function ListIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" width="14" height="14">
-      <line x1="8" y1="6" x2="21" y2="6" />
-      <line x1="8" y1="12" x2="21" y2="12" />
-      <line x1="8" y1="18" x2="21" y2="18" />
-      <line x1="3" y1="6" x2="3.01" y2="6" />
-      <line x1="3" y1="12" x2="3.01" y2="12" />
-      <line x1="3" y1="18" x2="3.01" y2="18" />
-    </svg>
-  );
-}
-function CheckIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" width="14" height="14">
-      <polyline points="20 6 9 17 4 12" />
-    </svg>
-  );
-}

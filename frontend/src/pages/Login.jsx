@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { AlertTriangle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { tokenStore } from "../services/tokenStore.js";
 import "./Login.css";
@@ -191,11 +192,5 @@ function GoogleIcon() {
 }
 
 function WarnIcon() {
-  return (
-    <svg className="auth-warn-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-      <path d="M10 3.5L17.3 16.5H2.7L10 3.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" />
-      <line x1="10" y1="9" x2="10" y2="12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <circle cx="10" cy="14.5" r="0.75" fill="currentColor" />
-    </svg>
-  );
+  return <AlertTriangle className="auth-warn-icon" size={16} aria-hidden="true" />;
 }
