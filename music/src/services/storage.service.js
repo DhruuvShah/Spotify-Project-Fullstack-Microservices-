@@ -1,5 +1,4 @@
 import ImageKit from "@imagekit/nodejs";
-import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import config from "../config/config.js";
 
@@ -18,7 +17,11 @@ const imagekit = new ImageKit({
  */
 export const uploadFile = async (filePath, originalName, folder) => {
   const ext = originalName.split(".").pop();
-  const uniqueFileName = `${uuidv4()}.${ext}`;
+  const base = originalName
+    .replace(/\.[^.]+$/, "")
+    .replace(/[^a-zA-Z0-9._-]/g, "_")
+    .slice(0, 80);
+  const uniqueFileName = `${base}_${Date.now()}.${ext}`;
 
   try {
     const response = await imagekit.files.upload({
