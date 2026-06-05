@@ -18,9 +18,10 @@
   inset: 0;
   z-index: -1;
   background: var(--glass-bg);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-bottom: var(--glass-border);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.60) inset;
   opacity: 0;
   transition: opacity var(--transition-base);
   pointer-events: none;
@@ -51,10 +52,8 @@
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.topbar-nav-btn:hover {
-  background: var(--color-surface-high);
-  color: var(--color-on-surface);
-}
+.topbar-nav-btn:hover  { background: var(--color-surface-high); color: var(--color-on-surface); }
+.topbar-nav-btn:active { transform: scale(0.88); transition: transform var(--transition-press); }
 
 /* ── Right: search + user pill ────────────────────────────────── */
 .topbar-right {
@@ -78,10 +77,8 @@
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.topbar-icon-btn:hover {
-  background: var(--color-surface-high);
-  color: var(--color-primary);
-}
+.topbar-icon-btn:hover  { background: var(--color-surface-high); color: var(--color-primary); }
+.topbar-icon-btn:active { transform: scale(0.88); transition: transform var(--transition-press); }
 
 /* ── User pill button ─────────────────────────────────────────── */
 .topbar-user {
@@ -92,7 +89,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  background: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: var(--glass-border);
   border-radius: var(--radius-full);
   padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
@@ -101,13 +100,15 @@
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   cursor: pointer;
-  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-xs);
+  transition:
+    background var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
 }
 
-.topbar-user-btn:hover {
-  background: var(--color-surface-high);
-  box-shadow: var(--shadow-xs);
-}
+.topbar-user-btn:hover  { background: var(--color-surface-high); box-shadow: var(--shadow-sm); }
+.topbar-user-btn:active { transform: scale(0.96); transition: transform var(--transition-press); }
 
 .topbar-avatar {
   width: 32px;
@@ -136,14 +137,14 @@
   position: absolute;
   top: calc(100% + var(--space-2));
   right: 0;
-  min-width: 220px;
+  min-width: 230px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: var(--glass-border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-2xl);
   padding: var(--space-1);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), var(--glass-shadow);
   z-index: var(--z-dropdown);
   animation: topbar-dd-in var(--transition-base) both;
 }

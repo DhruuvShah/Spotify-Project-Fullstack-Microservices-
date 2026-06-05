@@ -10,7 +10,12 @@
 .auth-panel {
   width: 45%;
   flex-shrink: 0;
-  background: #e8e1d5;
+  background: linear-gradient(
+    145deg,
+    #ede6da 0%,
+    #e4dbd0 40%,
+    #ddd4c8 100%
+  );
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -139,24 +144,26 @@
   justify-content: center;
   gap: var(--space-3);
   width: 100%;
-  height: 44px;
-  background: #ffffff;
+  height: 46px;
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(8px);
   border: 1px solid var(--color-outline-variant);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   color: var(--color-on-surface);
   cursor: pointer;
+  box-shadow: var(--shadow-xs);
   transition:
     background var(--transition-base),
-    border-color var(--transition-base);
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    transform var(--transition-fast);
 }
 
-.auth-google-btn:hover {
-  background: rgba(249, 241, 236, 0.7);
-  border-color: var(--color-outline);
-}
+.auth-google-btn:hover  { background: rgba(249, 241, 236, 0.85); border-color: var(--color-outline); box-shadow: var(--shadow-sm); }
+.auth-google-btn:active { transform: scale(0.97); transition: transform var(--transition-press); }
 
 .auth-google-icon {
   width: 18px;
@@ -272,32 +279,36 @@
 /* ── Submit button ───────────────────────────────────────────── */
 .auth-submit {
   width: 100%;
-  height: 48px;
+  height: 50px;
   margin-top: var(--space-2);
   background: var(--color-primary);
   color: var(--color-on-primary);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   font-family: var(--font-ui);
   font-size: 15px;
   font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-wide);
   cursor: pointer;
   box-shadow: var(--shadow-primary-sm);
   transition:
     background var(--transition-base),
+    box-shadow var(--transition-base),
     transform var(--transition-fast);
 }
 
 .auth-submit:hover:not(:disabled) {
   background: var(--color-primary-container);
+  box-shadow: var(--shadow-primary-md);
 }
 
 .auth-submit:active:not(:disabled) {
-  transform: scale(0.98);
+  transform: scale(0.97);
+  transition: transform var(--transition-press);
 }
 
 .auth-submit:disabled {
-  opacity: 0.55;
+  opacity: 0.50;
   cursor: not-allowed;
   box-shadow: none;
 }

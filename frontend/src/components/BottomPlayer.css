@@ -8,7 +8,7 @@
   background: var(--glass-player-bg);
   backdrop-filter: var(--glass-player-blur);
   -webkit-backdrop-filter: var(--glass-player-blur);
-  border-top: 1px solid rgba(255, 255, 255, 0.7);
+  border-top: none;
   box-shadow: var(--glass-player-shadow);
   z-index: var(--z-sticky);
   display: grid;
@@ -51,7 +51,10 @@
   border-radius: var(--radius-lg);
   object-fit: cover;
   display: block;
-  box-shadow: 0 2px 12px rgba(166, 51, 27, 0.18);
+  box-shadow:
+    0 4px 16px rgba(166, 51, 27, 0.22),
+    0 1px 4px  rgba(26, 28, 27, 0.10),
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.20);
 }
 
 .bp-cover--fallback {
@@ -118,7 +121,8 @@
     transform var(--transition-fast);
 }
 
-.bp-like-btn:hover  { color: var(--color-primary); transform: scale(1.12); }
+.bp-like-btn:hover  { color: var(--color-primary); transform: scale(1.14); }
+.bp-like-btn:active { transform: scale(0.88); transition: transform var(--transition-press); }
 .bp-like-btn.active { color: var(--color-primary); }
 
 /* ── Center: controls + progress bar ─────────────────────────── */
@@ -151,13 +155,14 @@
     transform var(--transition-fast);
 }
 
-.bp-ctrl-btn:hover  { color: var(--color-on-surface); transform: scale(1.08); }
-.bp-ctrl-btn.active { color: var(--color-primary); }
-.bp-ctrl-btn.active:hover { color: var(--color-primary-container); }
+.bp-ctrl-btn:hover         { color: var(--color-on-surface); transform: scale(1.10); }
+.bp-ctrl-btn:active        { transform: scale(0.90); transition: transform var(--transition-press); }
+.bp-ctrl-btn.active        { color: var(--color-primary); }
+.bp-ctrl-btn.active:hover  { color: var(--color-primary-container); }
 
 .bp-play-btn {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
   border: none;
@@ -174,10 +179,15 @@
     box-shadow var(--transition-fast);
 }
 
-.bp-play-btn:hover {
+.bp-play-btn:hover  {
   background: var(--color-primary-container);
-  transform: scale(1.07);
+  transform: scale(1.08);
   box-shadow: var(--shadow-primary-md);
+}
+.bp-play-btn:active {
+  transform: scale(0.93);
+  box-shadow: var(--shadow-primary-sm);
+  transition: transform var(--transition-press), box-shadow var(--transition-press);
 }
 
 /* ── Progress bar ─────────────────────────────────────────────── */
@@ -202,7 +212,7 @@
 .bp-progress-track {
   flex: 1;
   position: relative;
-  height: 3px;
+  height: 2px;
   background: var(--color-outline-variant);
   border-radius: var(--radius-full);
   cursor: pointer;
@@ -214,7 +224,7 @@
 
 .bp-progress-track:hover,
 .bp-progress-track.dragging {
-  height: 5px;
+  height: 4px;
 }
 
 .bp-progress-fill {
@@ -236,12 +246,13 @@
   position: absolute;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: 6px;
-  height: 6px;
-  background: var(--color-primary);
+  width: 8px;
+  height: 8px;
+  background: var(--color-on-surface);
   border-radius: 50%;
   opacity: 0;
   pointer-events: none;
+  box-shadow: 0 1px 4px rgba(26, 28, 27, 0.20);
   transition:
     opacity var(--transition-fast),
     width var(--transition-fast),
@@ -251,8 +262,8 @@
 .bp-progress-track:hover .bp-progress-thumb,
 .bp-progress-track.dragging .bp-progress-thumb {
   opacity: 1;
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
 }
 
 /* ── Right: volume + queue ────────────────────────────────────── */
@@ -358,17 +369,18 @@
   bottom: var(--player-h);
   right: var(--space-4);
   width: 320px;
-  max-height: 320px;
+  max-height: 340px;
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: var(--glass-border);
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  border-bottom: none;
+  border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   z-index: calc(var(--z-sticky) + 1);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg), var(--glass-shadow);
   animation: bp-queue-in var(--transition-slow) both;
 }
 

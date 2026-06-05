@@ -1,16 +1,17 @@
 /* ═══════════════════════════════════════════════════════════════
    LUMINA Design System — single source of truth for all tokens.
-   Every color, spacing, radius, shadow, and transition used in
-   the app references a variable defined here.
+   Refined to Apple HIG principles: Helvetica Neue typography,
+   generous radii, authentic liquid glass, layered shadows,
+   spring motion with press feedback.
    ═══════════════════════════════════════════════════════════════ */
 
 :root {
 
   /* ── Colour: surface scale ──────────────────────────────────── */
-  --color-bg:              #f9f9f6;   /* warm ivory — page background */
-  --color-surface:         #f4f4f1;   /* cards, panels */
-  --color-surface-high:    #eeeeeb;   /* hover tints, active rows */
-  --color-surface-inverse: #1a1c1b;   /* dark tooltip/popover bg */
+  --color-bg:              #f9f9f6;
+  --color-surface:         #f4f4f1;
+  --color-surface-high:    #eeeeeb;
+  --color-surface-inverse: #1a1c1b;
 
   /* ── Colour: primary — burnt orange ─────────────────────────── */
   --color-primary:          #a6331b;
@@ -37,31 +38,38 @@
   --color-warning:  #c9a82b;
 
   /* ── Colour: content ────────────────────────────────────────── */
-  --color-on-surface:         #1a1c1b;   /* primary text */
-  --color-on-surface-variant: #58413c;   /* secondary text / captions */
-  --color-on-surface-inverse: #f9f9f6;   /* text on dark surfaces */
-  --color-outline:            #8c716b;   /* dividers, input borders */
-  --color-outline-variant:    #e0bfb9;   /* subtle dividers */
+  --color-on-surface:         #1a1c1b;
+  --color-on-surface-variant: #58413c;
+  --color-on-surface-inverse: #f9f9f6;
+  --color-outline:            #8c716b;
+  --color-outline-variant:    #e0bfb9;
 
   /* ── Glass / Liquid Glass ───────────────────────────────────── */
-  --glass-bg:     rgba(249, 249, 246, 0.72);
-  --glass-blur:   blur(24px) saturate(180%);
-  --glass-border: 1px solid rgba(140, 113, 107, 0.18);
+  /* Authentic Apple material: blur + saturate + brightness,
+     white top-edge highlight, subtle inner glow below surface. */
+  --glass-bg:     rgba(249, 249, 246, 0.78);
+  --glass-blur:   blur(28px) saturate(180%) brightness(1.02);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.64);
   --glass-shadow:
-    0 8px 32px rgba(166, 51, 27, 0.08),
-    0 1px 0 rgba(255, 255, 255, 0.60) inset;
+    0 8px 32px rgba(166, 51, 27, 0.07),
+    0 2px 8px  rgba(26, 28, 27, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    inset 0 -1px 0 rgba(140, 113, 107, 0.07);
 
-  /* Heavier glass for the player bar */
-  --glass-player-bg:    rgba(249, 249, 246, 0.82);
-  --glass-player-blur:  blur(28px) saturate(200%);
+  /* Player bar — heavier glass, stronger top-edge separation */
+  --glass-player-bg:    rgba(249, 249, 246, 0.88);
+  --glass-player-blur:  blur(36px) saturate(200%) brightness(1.02);
   --glass-player-shadow:
-    0 -1px 0 rgba(140, 113, 107, 0.14),
-    0 -8px 40px rgba(166, 51, 27, 0.10),
-    0  2px 0 rgba(255, 255, 255, 0.70) inset;
+    0 -1px 0 rgba(140, 113, 107, 0.10),
+    0 -16px 48px rgba(166, 51, 27, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 2px 0 rgba(255, 255, 255, 0.40);
 
   /* ── Typography ─────────────────────────────────────────────── */
+  /* Display: Playfair Display for editorial headings & hero text  */
+  /* UI: Helvetica Neue — crisp, neutral, unmistakably premium     */
   --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-ui:      'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-ui:      'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
 
   /* Type scale — 8pt baseline */
   --text-xs:   11px;
@@ -87,12 +95,12 @@
   --leading-base:   1.5;
   --leading-loose:  1.7;
 
-  /* Letter spacing */
-  --tracking-tight: -0.025em;
-  --tracking-snug:  -0.012em;
-  --tracking-base:  0em;
-  --tracking-wide:  0.04em;
-  --tracking-caps:  0.08em;
+  /* Letter spacing — Apple-grade optical correction per size tier */
+  --tracking-tight: -0.030em;  /* 30px+ display headings          */
+  --tracking-snug:  -0.016em;  /* 20–28px mid headings            */
+  --tracking-base:   0em;      /* 15–17px body text               */
+  --tracking-wide:   0.032em;  /* small labels, chips             */
+  --tracking-caps:   0.075em;  /* ALL-CAPS section labels         */
 
   /* ── Spacing — 8px grid (absolute px) ──────────────────────── */
   --space-px:  1px;
@@ -113,32 +121,47 @@
   --space-20:  80px;
   --space-24:  96px;
 
-  /* ── Border radii ───────────────────────────────────────────── */
-  --radius-xs:   1px;
-  --radius-sm:   2px;
-  --radius-md:   4px;
-  --radius-lg:   8px;
-  --radius-xl:   12px;
-  --radius-2xl:  16px;
-  --radius-3xl:  24px;
+  /* ── Border radii — Apple-grade generosity ──────────────────── */
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
+  --radius-2xl:  22px;
+  --radius-3xl:  32px;
   --radius-full: 9999px;
 
-  /* ── Elevation: tonal shadows on ivory background ───────────── */
-  --shadow-xs:  0 1px 2px  rgba(26, 28, 27, 0.06);
-  --shadow-sm:  0 2px 6px  rgba(26, 28, 27, 0.08);
-  --shadow-md:  0 4px 16px rgba(26, 28, 27, 0.10);
-  --shadow-lg:  0 8px 28px rgba(26, 28, 27, 0.13);
-  --shadow-xl:  0 16px 48px rgba(26, 28, 27, 0.16);
+  /* ── Elevation — ambient + direct layered shadows ───────────── */
+  --shadow-xs:
+    0 1px 2px rgba(26, 28, 27, 0.05),
+    0 0 0 0.5px rgba(26, 28, 27, 0.04);
+  --shadow-sm:
+    0 2px 6px rgba(26, 28, 27, 0.07),
+    0 1px 2px rgba(26, 28, 27, 0.04);
+  --shadow-md:
+    0 4px 16px rgba(26, 28, 27, 0.09),
+    0 2px 4px  rgba(26, 28, 27, 0.05);
+  --shadow-lg:
+    0 8px 28px rgba(26, 28, 27, 0.11),
+    0 4px 8px  rgba(26, 28, 27, 0.06);
+  --shadow-xl:
+    0 16px 48px rgba(26, 28, 27, 0.14),
+    0 8px 16px  rgba(26, 28, 27, 0.07);
 
-  /* Coloured shadows for interactive elements */
-  --shadow-primary-sm: 0 2px 8px  rgba(166, 51, 27, 0.24);
-  --shadow-primary-md: 0 4px 20px rgba(166, 51, 27, 0.30);
+  /* Primary-tinted shadows for interactive CTAs */
+  --shadow-primary-sm:
+    0 2px 8px  rgba(166, 51, 27, 0.28),
+    0 1px 3px  rgba(166, 51, 27, 0.16);
+  --shadow-primary-md:
+    0 4px 20px rgba(166, 51, 27, 0.34),
+    0 2px 6px  rgba(166, 51, 27, 0.18);
 
   /* ── Transitions ────────────────────────────────────────────── */
-  --transition-fast: 120ms ease;
-  --transition-base: 200ms ease;
-  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast:   120ms ease;
+  --transition-base:   200ms ease;
+  --transition-slow:   350ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-press:  100ms cubic-bezier(0.4, 0, 1, 1); /* :active feedback */
 
   /* ── Z-index scale ──────────────────────────────────────────── */
   --z-below:    -1;
@@ -159,7 +182,7 @@
   --content-max-w:  1280px;
 
   /* ── Range / Slider ─────────────────────────────────────────── */
-  --slider-track-h:   3px;
+  --slider-track-h:   2px;
   --slider-thumb-d:  12px;
   --slider-track-bg: var(--color-outline-variant);
   --slider-fill-bg:  var(--color-primary);

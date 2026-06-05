@@ -20,7 +20,7 @@
 }
 
 @keyframes modal-panel-in {
-  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  from { opacity: 0; transform: scale(0.92) translateY(14px); }
   to   { opacity: 1; transform: scale(1)    translateY(0);    }
 }
 
@@ -184,14 +184,13 @@
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
   cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
-.error-state__retry:hover {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}
+.error-state__retry:hover  { background: var(--color-primary); color: var(--color-on-primary); }
+.error-state__retry:active { transform: scale(0.96); transition: transform var(--transition-press); }
 
 /* ── Modal ───────────────────────────────────────────────────── */
 .modal-backdrop {
@@ -215,7 +214,7 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: var(--glass-border);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-3xl);
   box-shadow: var(--shadow-xl), var(--glass-shadow);
   animation: modal-panel-in var(--transition-slow) both;
   overflow: hidden;
@@ -281,29 +280,32 @@
   padding: 9px 20px;
   background: transparent;
   border: 1.5px solid var(--color-outline-variant);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   color: var(--color-on-surface-variant);
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   cursor: pointer;
-  transition: border-color var(--transition-base), color var(--transition-base);
+  transition: border-color var(--transition-base), color var(--transition-base), transform var(--transition-fast);
 }
-.confirm-cancel:hover { border-color: var(--color-outline); color: var(--color-on-surface); }
+.confirm-cancel:hover  { border-color: var(--color-outline); color: var(--color-on-surface); }
+.confirm-cancel:active { transform: scale(0.96); transition: transform var(--transition-press); }
 
 .confirm-ok {
   padding: 9px 20px;
   background: var(--color-error);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-full);
   color: #fff;
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   font-weight: var(--weight-semibold);
   cursor: pointer;
-  transition: opacity var(--transition-base);
+  letter-spacing: var(--tracking-wide);
+  transition: opacity var(--transition-base), transform var(--transition-fast);
 }
-.confirm-ok:hover { opacity: 0.88; }
+.confirm-ok:hover  { opacity: 0.88; }
+.confirm-ok:active { transform: scale(0.96); transition: transform var(--transition-press); }
 
 /* ── Toast ───────────────────────────────────────────────────── */
 .toast-container {
@@ -408,8 +410,8 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: var(--glass-border);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--glass-shadow), var(--shadow-lg);
+  border-radius: var(--radius-3xl);
+  box-shadow: var(--glass-shadow), var(--shadow-xl);
   text-align: center;
 }
 
@@ -461,10 +463,8 @@
   transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.errb-btn-retry:hover {
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-}
+.errb-btn-retry:hover  { background: var(--color-primary); color: var(--color-on-primary); }
+.errb-btn-retry:active { transform: scale(0.96); transition: transform var(--transition-press); }
 
 .errb-btn-home {
   display: inline-flex;
@@ -477,12 +477,12 @@
   font-family: var(--font-ui);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-wide);
   text-decoration: none;
   cursor: pointer;
-  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: var(--shadow-primary-sm);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast), transform var(--transition-fast);
 }
 
-.errb-btn-home:hover {
-  background: var(--color-primary-container);
-  box-shadow: var(--shadow-primary-sm);
-}
+.errb-btn-home:hover  { background: var(--color-primary-container); box-shadow: var(--shadow-primary-md); }
+.errb-btn-home:active { transform: scale(0.96); transition: transform var(--transition-press); }
