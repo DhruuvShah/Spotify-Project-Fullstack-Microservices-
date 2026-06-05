@@ -24,6 +24,8 @@ export function PlayerProvider({ children }) {
   const queueIdxRef = useRef(0);
   const repeatRef   = useRef("off");
   const shuffleRef  = useRef(false);
+  const mutedRef    = useRef(false);
+  const volumeRef   = useRef(1);
 
   const [currentTrack, setCurrentTrack] = useState(null);
   const [queue,        setQueue]         = useState([]);
@@ -136,6 +138,8 @@ export function PlayerProvider({ children }) {
   }, []);
 
   const changeVolume = useCallback((val) => {
+    volumeRef.current = val;
+    mutedRef.current  = val === 0;
     setVolume(val);
     setMuted(val === 0);
     if (audioRef.current) audioRef.current.volume = val;
@@ -146,10 +150,11 @@ export function PlayerProvider({ children }) {
     if (!audio) return;
     setMuted((m) => {
       const next = !m;
-      audio.volume = next ? 0 : volume;
+      mutedRef.current = next;
+      audio.volume = next ? 0 : volumeRef.current;
       return next;
     });
-  }, [volume]);
+  }, []);
 
   const toggleRepeat = useCallback(() => {
     setRepeat((r) => {
@@ -205,20 +210,32 @@ export function PlayerProvider({ children }) {
     const audio = audioRef.current;
     if (!audio) return;
     setDuration(audio.duration);
-    audio.volume = muted ? 0 : volume;
-    // We don't call audio.play() here anymore, the useEffect below will handle it
+    audio.volume = mutedRef.current ? 0 : volumeRef.current;
   }
 
-  // Sync the audio element's play/pause state with the React state
+  // Sync the audio element's play/pause state with the React playing state.
+  // Runs after every commit where playing or currentTrack changed.
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !currentTrack) return;
-    
+
     if (playing && audio.paused) {
-      audio.play().catch((err) => {
-        console.warn("[LUMINA] Autoplay blocked by browser:", err);
-        // If autoplay is blocked, revert the UI state to paused
-        setPlaying(false);
+      const isMuted = mutedRef.current;
+      const vol     = volumeRef.current;
+      audio.volume  = isMuted ? 0 : vol;
+
+      audio.play().catch(() => {
+        // Browser blocked autoplay (no prior user gesture in this tab).
+        // Muted autoplay is always allowed — play muted then immediately restore.
+        audio.muted = true;
+        audio.play()
+          .then(() => {
+            audio.muted  = isMuted;
+            audio.volume = isMuted ? 0 : vol;
+          })
+          .catch(() => {
+            setPlaying(false);
+          });
       });
     } else if (!playing && !audio.paused) {
       audio.pause();

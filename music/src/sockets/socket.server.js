@@ -60,12 +60,14 @@ function initSocketServer(httpServer) {
   });
 
   io.on("connection", (socket) => {
-    const { id: userId, role } = socket.user;
+    const userId = socket.user.id;
+    const role   = socket.user.role;
     logger.info({ userId, role }, "Socket connected");
 
+    // Join a private room named after the user — all same-account sockets share it
     socket.join(userId);
 
-    // Sync current state to newly connected / reconnected device
+    // Push current "now playing" state to newly connected / reconnected device
     const current = nowPlaying.get(userId);
     if (current) socket.emit("sync", current);
 
@@ -82,7 +84,9 @@ function initSocketServer(httpServer) {
       }
 
       nowPlaying.set(userId, payload);
-      socket.broadcast.to(userId).emit("play", payload);
+
+      // socket.to() broadcasts to all other sockets in the room (excludes sender)
+      socket.to(userId).emit("play", payload);
 
       const roomSize = io.sockets.adapter.rooms.get(userId)?.size ?? 0;
       logger.info({ userId, roomSize }, "play broadcast");
