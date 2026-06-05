@@ -15,14 +15,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-transporter.verify((error) => {
-  if (error) {
-    console.error("Email transporter verification failed:", error);
-  } else {
-    console.log("Email transporter ready");
-  }
-});
-
 const sendEmail = async (to, subject, html) => {
   const info = await transporter.sendMail({
     from: `"Lumina" <${config.EMAIL_USER}>`,
