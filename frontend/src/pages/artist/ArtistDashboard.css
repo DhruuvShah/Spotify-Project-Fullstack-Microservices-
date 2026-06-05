@@ -602,8 +602,6 @@
   overflow-y: auto;
   max-height: 340px;
   margin: 0 calc(-1 * var(--space-8));
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-outline-variant) transparent;
 }
 
 .ad-picker-row {

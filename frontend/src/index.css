@@ -127,35 +127,14 @@ img {
   color: var(--color-on-surface);
 }
 
-/* ── Custom scrollbar — 3px, near-invisible track, warm thumb ── */
+/* ── Hide all scrollbars — scrolling still works ─────────────── */
 ::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: var(--color-surface);
-  border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-outline-variant);
-  border-radius: var(--radius-full);
-  transition: background var(--transition-fast);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-outline);
-}
-
-::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
-/* Firefox scrollbar */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-outline-variant) var(--color-surface);
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 /* ── Focus management — Apple-level visible ring ────────────── */

@@ -171,16 +171,7 @@
   gap: var(--space-4);
   overflow-x: auto;
   padding-bottom: var(--space-3);
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-outline-variant) transparent;
   scroll-snap-type: x mandatory;
-}
-
-.home-music-scroll::-webkit-scrollbar { height: 3px; }
-.home-music-scroll::-webkit-scrollbar-track { background: transparent; }
-.home-music-scroll::-webkit-scrollbar-thumb {
-  background: var(--color-outline-variant);
-  border-radius: var(--radius-full);
 }
 
 /* ── Music card — 160×196px ──────────────────────────────────── */
