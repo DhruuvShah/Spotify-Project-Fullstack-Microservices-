@@ -63,7 +63,6 @@ export default function Sidebar() {
       {/* ── Logo ── */}
       <Link to="/" className="sidebar-logo" aria-label="LUMINA — go home">
         <img src="/lumina.svg" alt="" className="sidebar-logo-img" aria-hidden="true" width={28} height={28} />
-        <span className="sidebar-logo-text">LUMINA</span>
       </Link>
 
       {/* ── Primary nav ── */}
