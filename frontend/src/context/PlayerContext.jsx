@@ -210,19 +210,27 @@ export function PlayerProvider({ children }) {
     const audio = audioRef.current;
     if (!audio) return;
     setDuration(audio.duration);
-    audio.volume = mutedRef.current ? 0 : volumeRef.current;
   }
 
-  // Called when audio element fires "play". If the browser started playback
-  // muted (autoPlay bypass), restore the user's actual mute/volume preference.
-  function handlePlay() {
+  // Fires exactly once per unique track. Sets muted=true so play() is always
+  // allowed (browsers never block muted autoplay), then unmutes in .then().
+  useEffect(() => {
     const audio = audioRef.current;
-    if (audio && audio.muted && !mutedRef.current) {
-      audio.muted  = false;
-      audio.volume = volumeRef.current;
-    }
-    setPlaying(true);
-  }
+    if (!audio) return;
+
+    const isMuted = mutedRef.current;
+    const vol     = volumeRef.current;
+
+    audio.muted  = true;
+    audio.volume = vol;
+
+    audio.play()
+      .then(() => {
+        audio.muted  = isMuted;
+        audio.volume = isMuted ? 0 : vol;
+      })
+      .catch(() => setPlaying(false));
+  }, [currentTrack?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleEnded() {
     const q  = queueRef.current;
@@ -283,18 +291,13 @@ export function PlayerProvider({ children }) {
       {currentTrack && (
         <audio
           key={currentTrack.id}
-          ref={(el) => {
-            audioRef.current = el;
-            // Set muted before autoPlay fires so the browser always allows it
-            if (el) el.muted = true;
-          }}
+          ref={audioRef}
           src={currentTrack.musicUrl}
-          autoPlay
           onLoadedMetadata={handleLoadedMetadata}
           onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}
           onPause={() => setPlaying(false)}
-          onPlay={handlePlay}
+          onPlay={() => setPlaying(true)}
           onError={() => setPlaying(false)}
         />
       )}
