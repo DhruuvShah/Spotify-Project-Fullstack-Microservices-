@@ -1,3 +1,6 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first"); // Render cannot reach Gmail over IPv6
+
 import app from "./src/app.js";
 import config from "./src/config/config.js";
 import { connectDB, disconnectDB } from "./src/config/database.js";
