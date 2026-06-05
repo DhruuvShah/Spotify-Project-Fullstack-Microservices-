@@ -213,34 +213,16 @@ export function PlayerProvider({ children }) {
     audio.volume = mutedRef.current ? 0 : volumeRef.current;
   }
 
-  // Sync the audio element's play/pause state with the React playing state.
-  // Runs after every commit where playing or currentTrack changed.
-  useEffect(() => {
+  // Called when audio element fires "play". If the browser started playback
+  // muted (autoPlay bypass), restore the user's actual mute/volume preference.
+  function handlePlay() {
     const audio = audioRef.current;
-    if (!audio || !currentTrack) return;
-
-    if (playing && audio.paused) {
-      const isMuted = mutedRef.current;
-      const vol     = volumeRef.current;
-      audio.volume  = isMuted ? 0 : vol;
-
-      audio.play().catch(() => {
-        // Browser blocked autoplay (no prior user gesture in this tab).
-        // Muted autoplay is always allowed — play muted then immediately restore.
-        audio.muted = true;
-        audio.play()
-          .then(() => {
-            audio.muted  = isMuted;
-            audio.volume = isMuted ? 0 : vol;
-          })
-          .catch(() => {
-            setPlaying(false);
-          });
-      });
-    } else if (!playing && !audio.paused) {
-      audio.pause();
+    if (audio && audio.muted && !mutedRef.current) {
+      audio.muted  = false;
+      audio.volume = volumeRef.current;
     }
-  }, [playing, currentTrack]);
+    setPlaying(true);
+  }
 
   function handleEnded() {
     const q  = queueRef.current;
@@ -301,13 +283,19 @@ export function PlayerProvider({ children }) {
       {currentTrack && (
         <audio
           key={currentTrack.id}
-          ref={audioRef}
+          ref={(el) => {
+            audioRef.current = el;
+            // Set muted before autoPlay fires so the browser always allows it
+            if (el) el.muted = true;
+          }}
           src={currentTrack.musicUrl}
-          onTimeUpdate={handleTimeUpdate}
+          autoPlay
           onLoadedMetadata={handleLoadedMetadata}
+          onTimeUpdate={handleTimeUpdate}
           onEnded={handleEnded}
           onPause={() => setPlaying(false)}
-          onPlay={() => setPlaying(true)}
+          onPlay={handlePlay}
+          onError={() => setPlaying(false)}
         />
       )}
     </PlayerContext.Provider>
