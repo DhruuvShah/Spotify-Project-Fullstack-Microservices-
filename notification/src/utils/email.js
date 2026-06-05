@@ -2,7 +2,10 @@ import config from "../config/config.js";
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  family: 4, // force IPv4 — Render cannot reach Gmail over IPv6
   auth: {
     type: "OAuth2",
     user: config.EMAIL_USER,
