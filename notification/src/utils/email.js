@@ -1,42 +1,36 @@
 import config from "../config/config.js";
-import nodemailer from "nodemailer";
-import { resolve4 } from "dns/promises";
+import { google } from "googleapis";
 
-let _transporter = null;
+const oauth2Client = new google.auth.OAuth2(
+  config.CLIENT_ID,
+  config.CLIENT_SECRET,
+  "https://developers.google.com/oauthplayground"
+);
 
-async function getTransporter() {
-  if (_transporter) return _transporter;
+oauth2Client.setCredentials({ refresh_token: config.REFRESH_TOKEN });
 
-  // Explicitly resolve to IPv4 — Render cannot reach Gmail over IPv6
-  const [smtpHost] = await resolve4("smtp.gmail.com");
-
-  _transporter = nodemailer.createTransport({
-    host: smtpHost,         // IPv4 address, bypasses all DNS at connect time
-    port: 465,
-    secure: true,
-    tls: { servername: "smtp.gmail.com" }, // correct cert validation despite IP host
-    auth: {
-      type: "OAuth2",
-      user: config.EMAIL_USER,
-      clientId: config.CLIENT_ID,
-      clientSecret: config.CLIENT_SECRET,
-      refreshToken: config.REFRESH_TOKEN,
-    },
-  });
-
-  return _transporter;
-}
+const gmail = google.gmail({ version: "v1", auth: oauth2Client });
 
 const sendEmail = async (to, subject, html) => {
-  const transporter = await getTransporter();
-  const info = await transporter.sendMail({
-    from: `"Lumina" <${config.EMAIL_USER}>`,
-    to,
-    subject,
+  const raw = [
+    `From: "Lumina" <${config.EMAIL_USER}>`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    "MIME-Version: 1.0",
+    "Content-Type: text/html; charset=utf-8",
+    "",
     html,
+  ].join("\r\n");
+
+  const encoded = Buffer.from(raw).toString("base64url");
+
+  const res = await gmail.users.messages.send({
+    userId: "me",
+    requestBody: { raw: encoded },
   });
-  console.log("Email sent:", info.messageId);
-  return info;
+
+  console.log("Email sent via Gmail API:", res.data.id);
+  return { messageId: res.data.id };
 };
 
 export default sendEmail;

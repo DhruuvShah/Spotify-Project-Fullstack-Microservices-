@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest --config jest.config.cjs --runInBand --forceExit",
     "dev": "npx nodemon server.js",
-    "start": "node --dns-result-order=ipv4first server.js"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +16,7 @@
     "amqplib": "^1.0.7",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "googleapis": "^173.0.0",
     "mongoose": "^9.6.1",
     "nodemailer": "^8.0.7"
   },
