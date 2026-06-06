@@ -167,14 +167,19 @@
 
 /* ── Scroll row wrapper + nav arrows ─────────────────────────── */
 .home-scroll-wrap {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Scroll area fills remaining space */
+.home-scroll-wrap .home-music-scroll {
+  flex: 1;
+  min-width: 0;
 }
 
 .hsr-btn {
-  position: absolute;
-  top: 80px; /* centered on the 160px cover area */
-  transform: translateY(-50%);
-  z-index: var(--z-raised);
+  flex-shrink: 0;
   width: 28px;
   height: 28px;
   border-radius: var(--radius-full);
@@ -192,20 +197,23 @@
   transition:
     background var(--transition-fast),
     box-shadow  var(--transition-fast),
-    transform   var(--transition-fast);
+    transform   var(--transition-fast),
+    opacity     var(--transition-fast);
 }
 
-.hsr-btn--left  { left:  4px; }
-.hsr-btn--right { right: 4px; }
+.hsr-btn--hidden {
+  opacity: 0;
+  pointer-events: none;
+}
 
 .hsr-btn:hover {
   background: var(--color-surface-high);
   box-shadow: var(--shadow-md);
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
 }
 
 .hsr-btn:active {
-  transform: translateY(-50%) scale(0.92);
+  transform: scale(0.92);
   transition: transform var(--transition-press);
 }
 

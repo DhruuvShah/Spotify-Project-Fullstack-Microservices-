@@ -74,27 +74,27 @@ function ScrollableRow({ children, itemCount = 0 }) {
 
   return (
     <div className="home-scroll-wrap">
-      {canLeft && (
-        <button
-          className="hsr-btn hsr-btn--left"
-          onClick={() => scroll(-1)}
-          aria-label="Scroll left"
-        >
-          <ChevronLeftIcon />
-        </button>
-      )}
+      <button
+        className={`hsr-btn${canLeft ? "" : " hsr-btn--hidden"}`}
+        onClick={() => scroll(-1)}
+        aria-label="Scroll left"
+        tabIndex={canLeft ? 0 : -1}
+        aria-hidden={!canLeft}
+      >
+        <ChevronLeftIcon />
+      </button>
       <div ref={scrollRef} className="home-music-scroll">
         {children}
       </div>
-      {canRight && (
-        <button
-          className="hsr-btn hsr-btn--right"
-          onClick={() => scroll(1)}
-          aria-label="Scroll right"
-        >
-          <ChevronRightIcon />
-        </button>
-      )}
+      <button
+        className={`hsr-btn${canRight ? "" : " hsr-btn--hidden"}`}
+        onClick={() => scroll(1)}
+        aria-label="Scroll right"
+        tabIndex={canRight ? 0 : -1}
+        aria-hidden={!canRight}
+      >
+        <ChevronRightIcon />
+      </button>
     </div>
   );
 }
