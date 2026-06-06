@@ -201,6 +201,8 @@ export default function BottomPlayer() {
             <span className="bp-artist">{currentTrack.artist}</span>
           </div>
 
+          <AddToPlaylistBtn musicId={currentTrack.id ?? currentTrack._id} />
+
           <button
             className={`bp-like-btn${isLiked ? " active" : ""}`}
             onClick={() => toggleLike(currentTrack.id)}
@@ -209,8 +211,6 @@ export default function BottomPlayer() {
           >
             <HeartIcon filled={isLiked} width={18} height={18} />
           </button>
-
-          <AddToPlaylistBtn musicId={currentTrack.id ?? currentTrack._id} />
         </div>
 
         {/* ── Center: controls + custom progress bar ── */}

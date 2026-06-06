@@ -8,6 +8,7 @@ import {
   Music, ChevronDown,
 } from "lucide-react";
 import { usePlayer } from "../context/PlayerContext";
+import AddToPlaylistBtn from "../components/AddToPlaylistBtn";
 import "./MusicPlayer.css";
 import { MUSIC_URL } from "../config.js";
 
@@ -133,13 +134,16 @@ export default function MusicPlayer() {
             <h1 className="mp-title">{track.title}</h1>
             <p className="mp-artist">{track.artist}</p>
           </div>
-          <button
-            className={`mp-like-btn${isLiked ? " liked" : ""}`}
-            onClick={() => toggleLike(track.id)}
-            aria-label={isLiked ? "Unlike" : "Like"}
-          >
-            <HeartIcon filled={isLiked} />
-          </button>
+          <div className="mp-info-actions">
+            <AddToPlaylistBtn musicId={track.id ?? track._id} />
+            <button
+              className={`mp-like-btn${isLiked ? " liked" : ""}`}
+              onClick={() => toggleLike(track.id)}
+              aria-label={isLiked ? "Unlike" : "Like"}
+            >
+              <HeartIcon filled={isLiked} />
+            </button>
+          </div>
         </div>
 
         {/* Progress bar */}
