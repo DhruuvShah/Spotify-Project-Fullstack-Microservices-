@@ -115,10 +115,37 @@ export async function searchMusics(req, res) {
   if (!query || query.length > 200) return res.status(200).json({ musics: [] });
 
   try {
-    const docs = await musicModel
-      .find({ $text: { $search: query } }, { score: { $meta: "textScore" } })
-      .sort({ score: { $meta: "textScore" } })
-      .limit(20);
+    // Escape regex special characters so user input is treated as literal text
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const anywhere = new RegExp(escaped, "i");
+
+    const docs = await musicModel.aggregate([
+      { $match: { $or: [{ title: anywhere }, { artist: anywhere }] } },
+      {
+        $addFields: {
+          _rank: {
+            $switch: {
+              branches: [
+                // Title starts with query — highest priority
+                {
+                  case: { $regexMatch: { input: "$title", regex: `^${escaped}`, options: "i" } },
+                  then: 0,
+                },
+                // Artist starts with query — second priority
+                {
+                  case: { $regexMatch: { input: "$artist", regex: `^${escaped}`, options: "i" } },
+                  then: 1,
+                },
+              ],
+              default: 2, // contains query anywhere
+            },
+          },
+        },
+      },
+      { $sort: { _rank: 1, title: 1 } },
+      { $limit: 30 },
+      { $project: { _rank: 0 } },
+    ]);
 
     return res.status(200).json({ musics: docs.map(musicShape) });
   } catch (error) {
