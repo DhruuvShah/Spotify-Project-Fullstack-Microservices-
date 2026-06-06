@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ArtistDashboard.css";
 import axios from "axios";
-import { ListMusic, Plus, Play, Music, Pencil, Trash2, Check, X, Search } from "lucide-react";
+import { ListMusic, Plus, Play, Music, Pencil, Trash2, Check, X, Search, Headphones, Heart } from "lucide-react";
 import { usePlayer } from "../../context/PlayerContext";
 import { useToast } from "../../context/ToastContext";
 import { Modal } from "../../components/Modal.jsx";
@@ -730,9 +730,9 @@ export default function ArtistDashboard() {
                 <div className="ad-track-list">
                   <div className="ad-analytics-header">
                     <span>Track</span>
-                    <span className="col-right">Plays</span>
-                    <span className="col-right">Listeners</span>
-                    <span className="col-right">Likes</span>
+                    <span className="col-right ad-analytics-icon-col" title="Plays" aria-label="Plays"><PlayIconSm /></span>
+                    <span className="col-right ad-analytics-icon-col" title="Listeners" aria-label="Listeners"><HeadphonesIcon /></span>
+                    <span className="col-right ad-analytics-icon-col" title="Likes" aria-label="Likes"><HeartIconSm /></span>
                   </div>
                   {analytics.analytics.map((row) => (
                     <div key={String(row.id)} className="ad-analytics-row">
@@ -799,13 +799,16 @@ export default function ArtistDashboard() {
 }
 
 /* ── Icons — resolved via lucide-react imports at top ── */
-function PlaylistIcon()  { return <ListMusic aria-hidden="true" />; }
-function PlusIcon()      { return <Plus      aria-hidden="true" />; }
-function PlayIcon()      { return <Play      aria-hidden="true" />; }
-function MusicNoteIcon() { return <Music     aria-hidden="true" />; }
-function PencilIcon()    { return <Pencil    width={14} height={14} aria-hidden="true" />; }
-function TrashIcon()     { return <Trash2    width={14} height={14} aria-hidden="true" />; }
-function CheckIcon()     { return <Check     width={14} height={14} aria-hidden="true" />; }
-function XIcon()         { return <X         width={14} height={14} aria-hidden="true" />; }
-function XSmallIcon()    { return <X         width={12} height={12} aria-hidden="true" />; }
-function SearchIcon()    { return <Search    aria-hidden="true" />; }
+function PlaylistIcon()   { return <ListMusic  aria-hidden="true" />; }
+function PlusIcon()       { return <Plus       aria-hidden="true" />; }
+function PlayIcon()       { return <Play       aria-hidden="true" />; }
+function MusicNoteIcon()  { return <Music      aria-hidden="true" />; }
+function PencilIcon()     { return <Pencil     width={14} height={14} aria-hidden="true" />; }
+function TrashIcon()      { return <Trash2     width={14} height={14} aria-hidden="true" />; }
+function CheckIcon()      { return <Check      width={14} height={14} aria-hidden="true" />; }
+function XIcon()          { return <X          width={14} height={14} aria-hidden="true" />; }
+function XSmallIcon()     { return <X          width={12} height={12} aria-hidden="true" />; }
+function SearchIcon()     { return <Search     aria-hidden="true" />; }
+function PlayIconSm()     { return <Play       width={13} height={13} aria-hidden="true" />; }
+function HeadphonesIcon() { return <Headphones width={13} height={13} aria-hidden="true" />; }
+function HeartIconSm()    { return <Heart      width={13} height={13} aria-hidden="true" />; }

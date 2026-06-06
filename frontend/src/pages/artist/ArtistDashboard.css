@@ -334,6 +334,12 @@
 }
 .col-right { text-align: right; }
 
+.ad-analytics-icon-col {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 /* ── Playlist / Album grid ────────────────────────────────────── */
 .ad-playlist-grid {
   display: grid;
