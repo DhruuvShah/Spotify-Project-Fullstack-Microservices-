@@ -492,19 +492,23 @@
   .pd-hero-cover-wrap { width: 140px; height: 140px; }
   .pd-hero-title { font-size: 26px; }
 
+  /* Always show like and menu buttons on touch — no hover on mobile */
+  .pd-like-btn { opacity: 1; min-width: 44px; min-height: 44px; }
+  .pd-menu-btn { opacity: 1; min-width: 44px; min-height: 44px; }
+  .pd-track-row .atp-wrap { opacity: 1; }
+
   .pd-table-head,
-  .pd-track-row { grid-template-columns: 36px 1fr 52px 36px 36px; }
+  .pd-track-row { grid-template-columns: 36px 1fr 44px 44px; }
   .pd-th-artist,
   .pd-track-row .pd-track-artist-btn { display: none; }
+  .pd-th-dur, .pd-track-duration { display: none; }
 }
 
 @media (max-width: 520px) {
   .pd-hero-cover-wrap { width: 110px; height: 110px; }
 
   .pd-table-head,
-  .pd-track-row { grid-template-columns: 36px 1fr 36px; }
-  .pd-th-dur,
-  .pd-track-duration,
+  .pd-track-row { grid-template-columns: 36px 1fr 44px 44px; }
   .pd-track-row .atp-wrap { display: none; }
 
   .pd-actions { gap: var(--space-2); }

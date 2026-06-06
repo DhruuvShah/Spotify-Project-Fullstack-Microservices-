@@ -181,7 +181,7 @@ export default function UserPlaylistDetail() {
         ) : (
           <>
             <div className="pd-table-head">
-              <span className="pd-th-num">#</span>
+              <span className="pd-th-num"></span>
               <span>Title</span>
               <span className="pd-th-artist">Artist</span>
               <span className="pd-th-dur">Duration</span>

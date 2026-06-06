@@ -409,11 +409,16 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .sr-like-btn { opacity: 1; min-width: 44px; min-height: 44px; }
+  .sr-atp-wrap { opacity: 1; min-width: 44px; min-height: 44px; }
+}
+
 @media (max-width: 600px) {
   .sr-row {
-    grid-template-columns: 36px 42px 1fr auto 32px;
+    grid-template-columns: 36px 42px 1fr 36px 36px;
     gap: var(--space-2);
+    padding: 0 var(--space-3);
   }
-  .sr-atp-wrap { display: none; }
   .sr-input { font-size: 17px; }
 }

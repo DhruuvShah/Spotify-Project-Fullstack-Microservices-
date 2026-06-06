@@ -491,12 +491,38 @@ function CreatePlaylistModal({ onClose, onCreate }) {
   );
 }
 
+/* ── Liked Songs pinned card ──────────────────────────────────── */
+function LikedSongsCard({ count }) {
+  const navigate = useNavigate();
+  return (
+    <div
+      className="home-liked-card"
+      onClick={() => navigate("/profile")}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === "Enter") navigate("/profile"); }}
+      aria-label="Open Liked Songs"
+    >
+      <div className="hlc-cover">
+        <HeartIcon width={32} height={32} filled />
+      </div>
+      <div className="hpc-info">
+        <span className="hpc-title">Liked Songs</span>
+        <span className="hpc-meta">
+          {count != null ? `${count} ${count === 1 ? "song" : "songs"}` : "Your favourites"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main page component ──────────────────────────────────────── */
 export default function Home() {
   const { user }                   = useAuth();
   const [musics,        setMusics]        = useState([]);
   const [playlists,     setPlaylists]     = useState([]);
   const [userPlaylists, setUserPlaylists] = useState([]);
+  const [likedCount,    setLikedCount]    = useState(null);
   const [loading,       setLoading]       = useState(true);
   const [showCreate,    setShowCreate]    = useState(false);
 
@@ -505,7 +531,8 @@ export default function Home() {
   const name   = user?.fullname?.firstName ?? "";
 
   useEffect(() => {
-    Promise.all([
+    const isArtist = user?.role === "artist";
+    const promises = [
       axios
         .get(`${MUSIC_URL}/api/music/`, { withCredentials: true })
         .then((res) =>
@@ -537,8 +564,19 @@ export default function Home() {
         .get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
         .then((res) => setUserPlaylists(res.data.playlists))
         .catch(() => {}),
-    ]).finally(() => setLoading(false));
-  }, []);
+    ];
+
+    if (!isArtist) {
+      promises.push(
+        axios
+          .get(`${MUSIC_URL}/api/music/liked-tracks`, { withCredentials: true })
+          .then((res) => setLikedCount(res.data.musics?.length ?? 0))
+          .catch(() => setLikedCount(0))
+      );
+    }
+
+    Promise.all(promises).finally(() => setLoading(false));
+  }, [user]);
 
   function handleCreated(pl)          { setUserPlaylists((p) => [pl, ...p]); }
   function handleDeleted(id)          { setUserPlaylists((p) => p.filter((x) => x._id !== id)); }
@@ -588,10 +626,9 @@ export default function Home() {
             <div className="home-playlist-grid">
               {Array.from({ length: 4 }).map((_, i) => <SkeletonPlaylistCard key={i} />)}
             </div>
-          ) : userPlaylists.length === 0 ? (
-            <p className="home-empty">No playlists yet — create your first one.</p>
           ) : (
             <div className="home-playlist-grid">
+              {user?.role !== "artist" && <LikedSongsCard count={likedCount} />}
               {userPlaylists.map((pl, i) => (
                 <UserPlaylistCard
                   key={pl._id}
@@ -601,6 +638,9 @@ export default function Home() {
                   onRename={handleRenamed}
                 />
               ))}
+              {user?.role !== "artist" && userPlaylists.length === 0 && (
+                <p className="home-empty" style={{ gridColumn: "1/-1" }}>No playlists yet — create your first one.</p>
+              )}
             </div>
           )}
         </section>

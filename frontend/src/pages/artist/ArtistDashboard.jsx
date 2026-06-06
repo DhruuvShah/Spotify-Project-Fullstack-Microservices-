@@ -441,7 +441,7 @@ export default function ArtistDashboard() {
 
             <div className="ad-track-list">
               <div className="ad-track-header">
-                <span className="col-num">#</span>
+                <span className="col-num"></span>
                 <span className="col-title">Title</span>
                 <span className="col-artist">Artist</span>
                 <span className="col-play" />

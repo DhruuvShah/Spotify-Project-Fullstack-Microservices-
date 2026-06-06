@@ -55,6 +55,17 @@ export async function getArtistAlbums(req, res) {
   }
 }
 
+export async function getAlbumsByArtist(req, res) {
+  const { artistId } = req.params;
+  try {
+    const albums = await albumModel.find({ artistId }).sort({ createdAt: -1 }).select("_id title coverImageUrl musics");
+    return res.status(200).json({ albums });
+  } catch (error) {
+    req.log.error({ err: error }, "Error fetching albums by artist");
+    return res.status(500).json({ message: "Error fetching albums" });
+  }
+}
+
 export async function addMusicToAlbum(req, res) {
   const { id, musicId } = req.params;
   try {

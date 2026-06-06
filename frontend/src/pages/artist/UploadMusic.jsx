@@ -217,6 +217,10 @@ export default function UploadMusic() {
 
   return (
     <div className="up-root">
+      <button className="up-back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+        <ArrowLeftIcon />
+        <span>Back</span>
+      </button>
       <main className="up-main">
         <div className="up-card">
           <div className="up-card-header">

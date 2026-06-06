@@ -3,7 +3,7 @@
 .mp-root {
   min-height: calc(100svh - var(--topbar-height, 64px));
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   padding: clamp(var(--space-6), 5vw, var(--space-10)) var(--space-4)
     calc(var(--player-bar-height, 88px) + var(--space-8));
@@ -399,7 +399,7 @@
       var(--space-4)
       var(--space-3)
       calc(var(--mobile-nav-h, 56px) + var(--space-4));
-    align-items: flex-start;
+    align-items: center;
   }
   .mp-card {
     width: 100%;

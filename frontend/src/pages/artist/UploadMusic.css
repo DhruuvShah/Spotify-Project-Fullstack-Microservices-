@@ -9,6 +9,23 @@
   .up-root { padding-bottom: 0; }
 }
 
+.up-back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: none;
+  border: none;
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  padding: var(--space-3) var(--space-5);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  transition: color var(--transition-fast);
+}
+.up-back-btn:hover { color: var(--color-on-surface); }
+.up-back-btn svg { width: 18px; height: 18px; }
+
 .up-main {
   padding: clamp(var(--space-6), 4vw, var(--space-8));
   max-width: 800px;

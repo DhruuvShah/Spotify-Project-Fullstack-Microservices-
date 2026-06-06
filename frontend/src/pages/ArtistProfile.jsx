@@ -180,7 +180,7 @@ export default function ArtistProfile() {
         ) : (
           <>
             <div className="ap-table-head">
-              <span className="ap-th-num">#</span>
+              <span className="ap-th-num"></span>
               <span />
               <span>Title</span>
               <span className="ap-th-dur">Duration</span>

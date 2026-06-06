@@ -17,6 +17,34 @@ const GRADIENTS = [
   "linear-gradient(135deg, #8b6fc2, #4a3570)",
 ];
 
+/* ── 2×2 cover collage for playlist cards ── */
+function PlaylistCover({ musics, gradient }) {
+  const covers = (musics ?? []).filter((m) => m.coverImageUrl).slice(0, 4);
+  if (covers.length === 0)
+    return (
+      <div className="pf-pl-art" style={{ background: gradient }}>
+        <PlaylistIcon />
+      </div>
+    );
+  if (covers.length === 1)
+    return (
+      <div className="pf-pl-art pf-pl-art--single">
+        <img src={covers[0].coverImageUrl} alt={covers[0].title} loading="lazy" decoding="async" />
+      </div>
+    );
+  return (
+    <div className="pf-pl-art pf-pl-art--grid">
+      {Array.from({ length: 4 }).map((_, i) =>
+        covers[i] ? (
+          <img key={i} src={covers[i].coverImageUrl} alt={covers[i].title} loading="lazy" decoding="async" />
+        ) : (
+          <div key={i} className="pf-pl-art-empty" style={{ background: gradient }} />
+        )
+      )}
+    </div>
+  );
+}
+
 function fmt(secs) {
   if (!secs) return "";
   return `${Math.floor(secs / 60)}:${String(Math.floor(secs % 60)).padStart(2, "0")}`;
@@ -82,7 +110,22 @@ export default function Profile() {
         .catch(() => setLikedTracks([]))
         .finally(() => setLikedLoading(false));
       axios.get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
-        .then((res) => setUserPlaylists(res.data.playlists))
+        .then(async (res) => {
+          const basic = res.data.playlists;
+          const detailed = await Promise.all(
+            basic.map(async (pl) => {
+              const id = pl._id ?? pl.id;
+              if (!pl.musics || pl.musics.length === 0) return { ...pl, id, musics: [] };
+              try {
+                const r = await axios.get(`${MUSIC_URL}/api/music/user-playlist/${id}`, { withCredentials: true });
+                return r.data.playlist;
+              } catch {
+                return { ...pl, id, musics: [] };
+              }
+            })
+          );
+          setUserPlaylists(detailed);
+        })
         .catch(() => setUserPlaylists([]));
       axios.get(`${AUTH_URL}/api/auth/following`, { withCredentials: true })
         .then((res) => setFollowedArtists(res.data.artists))
@@ -211,7 +254,7 @@ export default function Profile() {
               ) : (
                 <>
                   <div className="pf-table-head" aria-hidden="true">
-                    <span className="pf-th-num">#</span>
+                    <span className="pf-th-num"></span>
                     <span />
                     <span>Title</span>
                     <span className="pf-th-dur">Duration</span>
@@ -263,9 +306,7 @@ export default function Profile() {
                       className="pf-playlist-card"
                       aria-label={`Open playlist ${pl.title}`}
                     >
-                      <div className="pf-pl-art" style={{ background: GRADIENTS[i % GRADIENTS.length] }}>
-                        <PlaylistIcon />
-                      </div>
+                      <PlaylistCover musics={pl.musics} gradient={GRADIENTS[i % GRADIENTS.length]} />
                       <div className="pf-pl-info">
                         <span className="pf-pl-title">{pl.title}</span>
                         <span className="pf-pl-count">

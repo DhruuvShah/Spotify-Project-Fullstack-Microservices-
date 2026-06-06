@@ -753,7 +753,5 @@
   .ad-playlist-grid { grid-template-columns: repeat(2, 1fr); }
   .ad-analytics-stats { grid-template-columns: 1fr; }
   .ad-analytics-header,
-  .ad-analytics-row { grid-template-columns: 1fr 50px 50px; }
-  .ad-analytics-header span:last-child,
-  .ad-analytics-row span:last-child { display: none; }
+  .ad-analytics-row { grid-template-columns: 1fr 44px 44px 44px; }
 }

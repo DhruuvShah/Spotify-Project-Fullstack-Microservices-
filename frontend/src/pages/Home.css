@@ -701,6 +701,32 @@
 .hm-submit:active:not(:disabled) { transform: scale(0.96); transition: transform var(--transition-press); }
 .hm-submit:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
 
+/* ── Liked Songs pinned card ─────────────────────────────────── */
+.home-liked-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow var(--transition-base), transform var(--transition-spring);
+  display: flex;
+  flex-direction: column;
+}
+.home-liked-card:hover {
+  box-shadow: 0 8px 32px rgba(166, 51, 27, 0.12);
+  transform: translateY(-2px);
+}
+.home-liked-card:active { transform: scale(0.97); }
+
+.hlc-cover {
+  aspect-ratio: 1;
+  background: linear-gradient(135deg, #a6331b 0%, #6d5098 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 1024px) {
   .home-playlist-grid { grid-template-columns: repeat(2, 1fr); }
