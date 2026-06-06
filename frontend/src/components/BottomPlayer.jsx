@@ -200,17 +200,6 @@ export default function BottomPlayer() {
             </button>
             <span className="bp-artist">{currentTrack.artist}</span>
           </div>
-
-          <AddToPlaylistBtn musicId={currentTrack.id ?? currentTrack._id} />
-
-          <button
-            className={`bp-like-btn${isLiked ? " active" : ""}`}
-            onClick={() => toggleLike(currentTrack.id)}
-            aria-label={isLiked ? "Unlike" : "Like"}
-            aria-pressed={isLiked}
-          >
-            <HeartIcon filled={isLiked} width={18} height={18} />
-          </button>
         </div>
 
         {/* ── Center: controls + custom progress bar ── */}
@@ -289,8 +278,19 @@ export default function BottomPlayer() {
           </div>
         </div>
 
-        {/* ── Right: volume (hover reveal) + queue ── */}
+        {/* ── Right: + | heart | volume | queue ── */}
         <div className="bp-right">
+          <AddToPlaylistBtn musicId={currentTrack.id ?? currentTrack._id} />
+
+          <button
+            className={`bp-like-btn${isLiked ? " active" : ""}`}
+            onClick={() => toggleLike(currentTrack.id)}
+            aria-label={isLiked ? "Unlike" : "Like"}
+            aria-pressed={isLiked}
+          >
+            <HeartIcon filled={isLiked} width={18} height={18} />
+          </button>
+
           <div className="bp-vol-wrap">
             <button
               className="bp-ctrl-btn"
