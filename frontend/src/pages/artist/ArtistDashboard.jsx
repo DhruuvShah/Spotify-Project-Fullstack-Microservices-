@@ -105,7 +105,7 @@ function SongPickerModal({ targetTitle, type, targetId, allTracks, currentMusics
     const musicId = String(track._id ?? track.id);
     const url =
       type === "playlist"
-        ? `${MUSIC_URL}/api/music/playlist/${targetId}/add/${musicId}`
+        ? `${MUSIC_URL}/api/music/user-playlist/${targetId}/add/${musicId}`
         : `${MUSIC_URL}/api/music/album/${targetId}/add/${musicId}`;
 
     axios
@@ -194,8 +194,23 @@ export default function ArtistDashboard() {
     axios.get(`${MUSIC_URL}/api/music/artist-musics`, { withCredentials: true })
       .then((res) => setMusics(res.data.musics.map((m) => ({ ...m, id: m._id ?? m.id }))))
       .catch(() => {});
-    axios.get(`${MUSIC_URL}/api/music/playlist/artist`, { withCredentials: true })
-      .then((res) => setPlaylists(res.data.playlists))
+    axios.get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
+      .then(async (res) => {
+        const basic = res.data.playlists;
+        const detailed = await Promise.all(
+          basic.map(async (pl) => {
+            const id = pl._id ?? pl.id;
+            if (!pl.musics || pl.musics.length === 0) return { ...pl, id, musics: [] };
+            try {
+              const r = await axios.get(`${MUSIC_URL}/api/music/user-playlist/${id}`, { withCredentials: true });
+              return r.data.playlist;
+            } catch {
+              return { ...pl, id, musics: [] };
+            }
+          })
+        );
+        setPlaylists(detailed);
+      })
       .catch(() => {});
     axios.get(`${MUSIC_URL}/api/music/album/artist`, { withCredentials: true })
       .then((res) => setAlbums(res.data.albums))
@@ -251,7 +266,7 @@ export default function ArtistDashboard() {
   }
 
   function handleCreatePlaylist(title, setError, setLoading) {
-    axios.post(`${MUSIC_URL}/api/music/playlist`, { title, musics: [] }, { withCredentials: true })
+    axios.post(`${MUSIC_URL}/api/music/user-playlist`, { title }, { withCredentials: true })
       .then((res) => {
         setPlaylists((prev) => [...prev, { ...res.data.playlist, musics: [] }]);
         setShowCreatePlaylist(false);
@@ -297,7 +312,7 @@ export default function ArtistDashboard() {
 
   function removeFromPlaylist(playlistId, musicId) {
     axios
-      .patch(`${MUSIC_URL}/api/music/playlist/${playlistId}/remove/${musicId}`, {}, { withCredentials: true })
+      .patch(`${MUSIC_URL}/api/music/user-playlist/${playlistId}/remove/${musicId}`, {}, { withCredentials: true })
       .then(() => {
         setPlaylists((prev) =>
           prev.map((pl) =>
@@ -331,7 +346,7 @@ export default function ArtistDashboard() {
       message: "Delete this playlist? This cannot be undone.",
       onConfirm: () => {
         axios
-          .delete(`${MUSIC_URL}/api/music/playlist/${playlistId}`, { withCredentials: true })
+          .delete(`${MUSIC_URL}/api/music/user-playlist/${playlistId}`, { withCredentials: true })
           .then(() => setPlaylists((prev) => prev.filter((pl) => String(pl.id ?? pl._id) !== String(playlistId))))
           .catch(() => {});
       },
@@ -355,7 +370,7 @@ export default function ArtistDashboard() {
     const { type, id } = renameTarget;
     const url =
       type === "playlist"
-        ? `${MUSIC_URL}/api/music/playlist/${id}`
+        ? `${MUSIC_URL}/api/music/user-playlist/${id}`
         : `${MUSIC_URL}/api/music/album/${id}`;
     axios
       .patch(url, { title: newTitle }, { withCredentials: true })

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { usePlayer } from "../context/PlayerContext";
+import AddToPlaylistBtn from "./AddToPlaylistBtn";
 import {
   PlayIcon, PauseIcon, PrevIcon, NextIcon,
   ShuffleIcon, RepeatIcon, RepeatOneIcon,
@@ -208,6 +209,8 @@ export default function BottomPlayer() {
           >
             <HeartIcon filled={isLiked} width={18} height={18} />
           </button>
+
+          <AddToPlaylistBtn musicId={currentTrack.id ?? currentTrack._id} />
         </div>
 
         {/* ── Center: controls + custom progress bar ── */}
