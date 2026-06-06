@@ -529,9 +529,7 @@
 .ad-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(26, 28, 27, 0.45);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(26, 28, 27, 0.52);
   display: flex;
   align-items: center;
   justify-content: center;

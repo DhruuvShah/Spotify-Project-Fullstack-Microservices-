@@ -5,11 +5,9 @@
   left: var(--sidebar-w);
   right: 0;
   height: var(--player-h);
-  background: var(--glass-player-bg);
-  backdrop-filter: var(--glass-player-blur);
-  -webkit-backdrop-filter: var(--glass-player-blur);
-  border-top: none;
-  box-shadow: var(--glass-player-shadow);
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-outline-variant);
+  box-shadow: var(--shadow-sm);
   z-index: var(--z-sticky);
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
@@ -370,10 +368,8 @@
   right: var(--space-4);
   width: 320px;
   max-height: 340px;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: var(--glass-border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-outline-variant);
   border-bottom: none;
   border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
   overflow: hidden;

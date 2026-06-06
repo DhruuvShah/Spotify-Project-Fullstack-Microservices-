@@ -443,10 +443,32 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */
-@media (max-width: 480px) {
-  .mp-root { padding: var(--space-4) var(--space-3) calc(var(--player-bar-height, 88px) + var(--space-6)); }
-  .mp-card { padding: var(--space-5); gap: var(--space-4); }
+@media (max-width: 768px) {
+  /* On mobile the bottom player is hidden; account for mobile nav bar (56px) */
+  .mp-root {
+    min-height: 100svh;
+    padding:
+      var(--space-4)
+      var(--space-3)
+      calc(var(--mobile-nav-h, 56px) + var(--space-4));
+    align-items: flex-start;
+  }
+  .mp-card {
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--radius-2xl);
+    padding: var(--space-5);
+    gap: var(--space-4);
+  }
+  .mp-cover-wrap { width: min(280px, 100%); }
   .mp-play-btn { width: 60px; height: 60px; }
   .mp-play-btn svg { width: 24px; height: 24px; }
   .mp-controls { gap: var(--space-3); }
+  .mp-speed-chips { flex-wrap: wrap; gap: var(--space-1); }
+}
+
+@media (max-width: 360px) {
+  .mp-card { padding: var(--space-4); gap: var(--space-3); }
+  .mp-cover-wrap { width: min(240px, 100%); }
+  .mp-controls { gap: var(--space-2); }
 }

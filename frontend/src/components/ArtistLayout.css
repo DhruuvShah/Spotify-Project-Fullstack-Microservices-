@@ -17,10 +17,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 0 var(--space-4);
-  background: rgba(18, 18, 18, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: #121212;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   z-index: var(--z-sticky);
 }
 .al-topbar-brand {
@@ -73,9 +71,7 @@
   display: flex;
   flex-direction: column;
   background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   padding: var(--space-6) 0 var(--space-4);
   overflow-y: auto;
 }
@@ -219,9 +215,7 @@
     transform: translateX(-100%);
     transition: transform var(--duration-slow) var(--ease-default);
     z-index: var(--z-sticky);
-    background: rgba(18, 18, 18, 0.97);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    background: #121212;
   }
   .al-sidebar.open { transform: translateX(0); }
   .al-sidebar-brand { display: none; }

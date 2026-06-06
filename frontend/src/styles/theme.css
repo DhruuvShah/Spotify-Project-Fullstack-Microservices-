@@ -44,26 +44,18 @@
   --color-outline:            #8c716b;
   --color-outline-variant:    #e0bfb9;
 
-  /* ── Glass / Liquid Glass ───────────────────────────────────── */
-  /* Authentic Apple material: blur + saturate + brightness,
-     white top-edge highlight, subtle inner glow below surface. */
-  --glass-bg:     rgba(249, 249, 246, 0.78);
-  --glass-blur:   blur(28px) saturate(180%) brightness(1.02);
-  --glass-border: 1px solid rgba(255, 255, 255, 0.64);
-  --glass-shadow:
-    0 8px 32px rgba(166, 51, 27, 0.07),
-    0 2px 8px  rgba(26, 28, 27, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.82),
-    inset 0 -1px 0 rgba(140, 113, 107, 0.07);
+  /* ── Solid surface tokens (replaces liquid glass) ──────────── */
+  --glass-bg:     var(--color-surface);
+  --glass-blur:   none;
+  --glass-border: 1px solid var(--color-outline-variant);
+  --glass-shadow: var(--shadow-sm);
 
-  /* Player bar — heavier glass, stronger top-edge separation */
-  --glass-player-bg:    rgba(249, 249, 246, 0.88);
-  --glass-player-blur:  blur(36px) saturate(200%) brightness(1.02);
+  /* Player bar — solid, with top separator */
+  --glass-player-bg:    var(--color-surface);
+  --glass-player-blur:  none;
   --glass-player-shadow:
-    0 -1px 0 rgba(140, 113, 107, 0.10),
-    0 -16px 48px rgba(166, 51, 27, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.92),
-    inset 0 2px 0 rgba(255, 255, 255, 0.40);
+    0 -1px 0 var(--color-outline-variant),
+    var(--shadow-sm);
 
   /* ── Typography ─────────────────────────────────────────────── */
   /* Helvetica Now Display — the modern revival of Helvetica,
