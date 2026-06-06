@@ -166,17 +166,16 @@
 }
 
 /* ── Scroll row wrapper + nav arrows ─────────────────────────── */
-/* Wrapper reserves 38px gutter on each side for the arrow buttons.
-   Buttons are absolutely positioned in that gutter — clearly outside
-   the scroll container, never overlapping any card. */
+/* Wrapper is full-width (no padding taken away from scroll area).
+   Buttons use negative left/right to sit in home-main's existing
+   padding gutter — completely outside the scroll container. */
 .home-scroll-wrap {
   position: relative;
-  padding: 0 38px;
 }
 
 .hsr-btn {
   position: absolute;
-  top: 80px; /* vertically centered on the 160px cover area */
+  top: 80px; /* centered on the 160px cover area */
   transform: translateY(-50%);
   z-index: var(--z-raised);
   width: 28px;
@@ -200,8 +199,9 @@
     opacity     var(--transition-fast);
 }
 
-.hsr-btn--left  { left: 4px; }
-.hsr-btn--right { right: 4px; }
+/* Negative values push buttons into home-main's existing side padding */
+.hsr-btn--left  { left:  -22px; }
+.hsr-btn--right { right: -22px; }
 
 .hsr-btn--hidden {
   opacity: 0;
