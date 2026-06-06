@@ -38,6 +38,83 @@ function SectionHead({ eyebrow, title, action }) {
   );
 }
 
+/* ── Horizontal scroll row with edge arrow buttons ────────────── */
+function ScrollableRow({ children, itemCount = 0 }) {
+  const scrollRef = useRef(null);
+  const [canLeft,  setCanLeft]  = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  function updateArrows() {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }
+
+  // Re-check whenever items load (async content changes scrollWidth)
+  useEffect(() => {
+    const raf = requestAnimationFrame(updateArrows);
+    return () => cancelAnimationFrame(raf);
+  }, [itemCount]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", updateArrows, { passive: true });
+    window.addEventListener("resize", updateArrows, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", updateArrows);
+      window.removeEventListener("resize", updateArrows);
+    };
+  }, []);
+
+  function scroll(dir) {
+    scrollRef.current?.scrollBy({ left: dir * 480, behavior: "smooth" });
+  }
+
+  return (
+    <div className="home-scroll-wrap">
+      {canLeft && (
+        <button
+          className="hsr-btn hsr-btn--left"
+          onClick={() => scroll(-1)}
+          aria-label="Scroll left"
+        >
+          <ChevronLeftIcon />
+        </button>
+      )}
+      <div ref={scrollRef} className="home-music-scroll">
+        {children}
+      </div>
+      {canRight && (
+        <button
+          className="hsr-btn hsr-btn--right"
+          onClick={() => scroll(1)}
+          aria-label="Scroll right"
+        >
+          <ChevronRightIcon />
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ChevronLeftIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
+  );
+}
+
 /* ── Track card skeleton ──────────────────────────────────────── */
 function SkeletonTrackCard() {
   return (
@@ -487,11 +564,11 @@ export default function Home() {
           ) : musics.length === 0 ? (
             <p className="home-empty">No tracks available yet.</p>
           ) : (
-            <div className="home-music-scroll">
+            <ScrollableRow itemCount={musics.length}>
               {musics.map((m, i) => (
                 <MusicCard key={m.id ?? i} music={m} allMusics={musics} />
               ))}
-            </div>
+            </ScrollableRow>
           )}
         </section>
 
