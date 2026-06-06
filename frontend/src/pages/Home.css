@@ -298,11 +298,7 @@
   transform: translateY(0) scale(1);
 }
 
-/* Playing: burnt orange ring + always show play btn */
-.home-music-card.is-playing .hmc-cover-wrap {
-  box-shadow: 0 0 0 2.5px var(--color-primary);
-}
-
+/* Playing: always show play btn */
 .home-music-card.is-playing .hmc-play-btn {
   opacity: 1;
   transform: translateY(0);

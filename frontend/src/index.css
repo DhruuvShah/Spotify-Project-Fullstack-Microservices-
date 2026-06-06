@@ -1,4 +1,89 @@
 /* ═══════════════════════════════════════════════════════════════
+   Helvetica Now Display — local font declarations
+   Served from /public/fonts/ — no external network request needed
+   ═══════════════════════════════════════════════════════════════ */
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-LIGHT.TTF') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-LIGHTITA.TTF') format('truetype');
+  font-weight: 300;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-REGULAR.TTF') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-REGITA.TTF') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-MEDIUM.TTF') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-MEDITA.TTF') format('truetype');
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-BOLD.TTF') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-BOLDITA.TTF') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-EXTRABOLD.TTF') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Helvetica Now Display';
+  src: url('/fonts/HELVETICANOWDISPLAY-BLACK.TTF') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    Global Reset + Typography Base + Utility Primitives
    Depends on: src/styles/theme.css (must load first)
    ═══════════════════════════════════════════════════════════════ */
@@ -47,21 +132,30 @@ body {
   isolation: isolate;
 }
 
-/* ── Typography: headings ───────────────────────────────────── */
+/* ── Typography: headings — Apple HIG weight scale ──────────── */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
   letter-spacing: var(--tracking-snug);
   color: var(--color-on-surface);
 }
 
-h1 { font-size: var(--text-4xl); letter-spacing: var(--tracking-tight); }
-h2 { font-size: var(--text-3xl); }
-h3 { font-size: var(--text-2xl); }
-h4 { font-size: var(--text-xl); }
-h5 { font-size: var(--text-lg); }
-h6 { font-size: var(--text-md); }
+/* Large Title — ExtraBold, tightest tracking */
+h1 {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Title 1 & 2 — Bold */
+h2 { font-size: var(--text-3xl); font-weight: var(--weight-bold); }
+h3 { font-size: var(--text-2xl); font-weight: var(--weight-bold); }
+
+/* Title 3 & Headline — Medium weight, looser tracking */
+h4 { font-size: var(--text-xl);  font-weight: var(--weight-medium); letter-spacing: var(--tracking-base); }
+h5 { font-size: var(--text-lg);  font-weight: var(--weight-medium); letter-spacing: var(--tracking-base); }
+h6 { font-size: var(--text-md);  font-weight: var(--weight-medium); letter-spacing: var(--tracking-base); }
 
 /* ── Typography: body elements ──────────────────────────────── */
 p {

@@ -38,7 +38,7 @@
   --color-warning:  #c9a82b;
 
   /* ── Colour: content ────────────────────────────────────────── */
-  --color-on-surface:         #1a1c1b;
+  --color-on-surface:         #2d1a14;
   --color-on-surface-variant: #58413c;
   --color-on-surface-inverse: #f9f9f6;
   --color-outline:            #8c716b;
@@ -66,10 +66,10 @@
     inset 0 2px 0 rgba(255, 255, 255, 0.40);
 
   /* ── Typography ─────────────────────────────────────────────── */
-  /* Display: Playfair Display for editorial headings & hero text  */
-  /* UI: Helvetica Neue — crisp, neutral, unmistakably premium     */
-  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
-  --font-ui:      'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+  /* Helvetica Now Display — the modern revival of Helvetica,
+     used across display and UI tiers for a unified Apple-grade feel */
+  --font-display: 'Helvetica Now Display', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
+  --font-ui:      'Helvetica Now Display', 'Helvetica Neue', Helvetica, Arial, system-ui, sans-serif;
 
   /* Type scale — 8pt baseline */
   --text-xs:   11px;
@@ -83,11 +83,14 @@
   --text-4xl:  48px;
   --text-5xl:  64px;
 
-  /* Font weights */
-  --weight-regular:  400;
-  --weight-medium:   500;
-  --weight-semibold: 600;
-  --weight-bold:     700;
+  /* Font weights — Helvetica Now Display available weights */
+  --weight-light:     300;
+  --weight-regular:   400;
+  --weight-medium:    500;
+  --weight-semibold:  600;  /* maps to Bold (700) in Helvetica Now Display */
+  --weight-bold:      700;
+  --weight-extrabold: 800;
+  --weight-black:     900;
 
   /* Line heights */
   --leading-tight:  1.15;
