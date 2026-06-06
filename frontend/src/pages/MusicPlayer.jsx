@@ -12,8 +12,6 @@ import AddToPlaylistBtn from "../components/AddToPlaylistBtn";
 import "./MusicPlayer.css";
 import { MUSIC_URL } from "../config.js";
 
-const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
-
 function fmt(s) {
   if (!s || isNaN(s)) return "0:00";
   return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
@@ -50,11 +48,9 @@ export default function MusicPlayer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [imgErr, setImgErr] = useState(false);
-  const [speed, setSpeed] = useState(1);
 
   useEffect(() => {
     setImgErr(false);
-    setSpeed(1);
   }, [id]);
 
   useEffect(() => {
@@ -67,11 +63,6 @@ export default function MusicPlayer() {
       .catch(() => setError("Track not found."))
       .finally(() => setLoading(false));
   }, [id]);
-
-  function changeSpeed(s) {
-    setSpeed(s);
-    if (audioRef.current) audioRef.current.playbackRate = s;
-  }
 
   function handleSeekClick(e) {
     const bar = seekBarRef.current;
@@ -221,21 +212,6 @@ export default function MusicPlayer() {
           />
         </div>
 
-        {/* Speed */}
-        <div className="mp-speed-row">
-          <span className="mp-speed-label">Speed</span>
-          <div className="mp-speed-chips">
-            {SPEEDS.map((s) => (
-              <button
-                key={s}
-                className={`mp-speed-chip${speed === s ? " active" : ""}`}
-                onClick={() => changeSpeed(s)}
-              >
-                {s}×
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

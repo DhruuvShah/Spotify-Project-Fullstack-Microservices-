@@ -709,6 +709,18 @@
 @media (max-width: 768px) {
   .home-music-card { flex: 0 0 144px; }
   .hmc-cover-wrap  { width: 144px; height: 144px; }
+  /* Touch: always show play overlay (no hover on mobile) */
+  .hmc-play-btn { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 480px) {
+  .home-music-card { flex: 0 0 130px; }
+  .hmc-cover-wrap  { width: 130px; height: 130px; }
+}
+
+@media (max-width: 360px) {
+  .home-music-card { flex: 0 0 120px; }
+  .hmc-cover-wrap  { width: 120px; height: 120px; }
 }
 
 @media (max-width: 600px) {

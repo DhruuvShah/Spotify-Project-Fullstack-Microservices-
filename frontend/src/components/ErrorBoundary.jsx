@@ -9,11 +9,7 @@ export default class ErrorBoundary extends Component {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error, info) {
-    if (import.meta.env.DEV) {
-      console.error("[ErrorBoundary]", error, info.componentStack);
-    }
-  }
+  componentDidCatch(_error, _info) {}
 
   handleRetry = () => {
     this.setState({ hasError: false, error: null });

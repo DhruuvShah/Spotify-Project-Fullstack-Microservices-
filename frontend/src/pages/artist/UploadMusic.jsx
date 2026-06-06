@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useToast } from "../../context/ToastContext";
 import { ArrowLeft, Upload, Image, Camera, Music, File, AlertCircle, X, Play, Pause, Loader2 } from "lucide-react";
 import "./UploadMusic.css";
 import { MUSIC_URL } from "../../config.js";
@@ -124,6 +125,7 @@ function AudioPlayer({ musicUrl, coverPreview, title }) {
 /* ── Main Component ───────────────────────────────────────────── */
 export default function UploadMusic() {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const [title, setTitle] = useState("");
   const [musicFile, setMusicFile] = useState(null);
@@ -196,17 +198,13 @@ export default function UploadMusic() {
 
     try {
       setLoading(true);
-      await axios
-        .post(`${MUSIC_URL}/api/music/upload`, formData, {
-          withCredentials: true,
-        })
-        .then(() => {
-          navigate("/artist/dashboard");
-        });
+      await axios.post(`${MUSIC_URL}/api/music/upload`, formData, { withCredentials: true });
+      toast.success("Track uploaded successfully!");
+      navigate("/artist/dashboard");
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Upload failed. Please try again.",
-      );
+      const msg = err.response?.data?.message || "Upload failed. Please try again.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

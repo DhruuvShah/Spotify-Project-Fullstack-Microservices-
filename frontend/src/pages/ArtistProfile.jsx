@@ -5,6 +5,7 @@ import { Play, Music, ChevronLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { usePlayer } from "../context/PlayerContext";
 import { useSocket } from "../context/SocketContext";
+import { useToast } from "../context/ToastContext";
 import "./ArtistProfile.css";
 import { AUTH_URL, MUSIC_URL } from "../config.js";
 
@@ -38,6 +39,7 @@ export default function ArtistProfile() {
   const { user } = useAuth();
   const { playTrack, currentTrack } = usePlayer();
   const { emitPlay } = useSocket();
+  const { toast } = useToast();
 
   const [artist, setArtist] = useState(null);
   const [musics, setMusics] = useState([]);
@@ -73,12 +75,14 @@ export default function ArtistProfile() {
         await axios.delete(`${AUTH_URL}/api/auth/follow/${artistId}`, { withCredentials: true });
         setFollowing(false);
         setArtist((a) => ({ ...a, followerCount: (a.followerCount ?? 1) - 1 }));
+        toast.success("Unfollowed");
       } else {
         await axios.post(`${AUTH_URL}/api/auth/follow/${artistId}`, {}, { withCredentials: true });
         setFollowing(true);
         setArtist((a) => ({ ...a, followerCount: (a.followerCount ?? 0) + 1 }));
+        toast.success(`Following ${artist.name}`);
       }
-    } catch {}
+    } catch { toast.error("Failed to update follow status"); }
     setFollowLoading(false);
   }
 

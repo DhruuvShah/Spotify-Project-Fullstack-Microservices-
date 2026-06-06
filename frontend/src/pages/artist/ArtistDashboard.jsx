@@ -4,6 +4,7 @@ import "./ArtistDashboard.css";
 import axios from "axios";
 import { ListMusic, Plus, Play, Music, Pencil, Trash2, Check, X, Search } from "lucide-react";
 import { usePlayer } from "../../context/PlayerContext";
+import { useToast } from "../../context/ToastContext";
 import { Modal } from "../../components/Modal.jsx";
 import { ConfirmModal } from "../../components/ConfirmModal.jsx";
 import { MUSIC_URL } from "../../config.js";
@@ -82,6 +83,7 @@ function CreateModal({ title: modalTitle, placeholder, initialValue = "", submit
 
 /* ── Song Picker Modal (own backdrop, has search + click-to-add) ── */
 function SongPickerModal({ targetTitle, type, targetId, allTracks, currentMusics, onAdded, onClose }) {
+  const { toast } = useToast();
   const [justAddedIds, setJustAddedIds] = useState(new Set());
   const [search, setSearch] = useState("");
   const searchRef = useRef(null);
@@ -113,8 +115,9 @@ function SongPickerModal({ targetTitle, type, targetId, allTracks, currentMusics
       .then(() => {
         setJustAddedIds((prev) => new Set([...prev, musicId]));
         onAdded(type, targetId, track);
+        toast.success(`Added to ${type}`);
       })
-      .catch(() => {});
+      .catch(() => { toast.error("Failed to add track"); });
   }
 
   return (
@@ -173,6 +176,7 @@ function SongPickerModal({ targetTitle, type, targetId, allTracks, currentMusics
 export default function ArtistDashboard() {
   const navigate = useNavigate();
   const { playTrack, currentTrack } = usePlayer();
+  const { toast } = useToast();
 
   const [musics, setMusics] = useState([]);
   const [playlists, setPlaylists] = useState([]);
@@ -242,8 +246,9 @@ export default function ArtistDashboard() {
           prev.map((m) => (m._id ?? m.id) === musicId ? { ...m, title: res.data.music.title } : m)
         );
         setEditingId(null);
+        toast.success("Track updated");
       })
-      .catch(() => {});
+      .catch(() => { toast.error("Failed to update track"); });
   }
 
   function cancelEdit(e) {
@@ -259,8 +264,8 @@ export default function ArtistDashboard() {
       onConfirm: () => {
         axios
           .delete(`${MUSIC_URL}/api/music/${musicId}`, { withCredentials: true })
-          .then(() => setMusics((prev) => prev.filter((m) => (m._id ?? m.id) !== musicId)))
-          .catch(() => {});
+          .then(() => { setMusics((prev) => prev.filter((m) => (m._id ?? m.id) !== musicId)); toast.success("Track deleted"); })
+          .catch(() => { toast.error("Failed to delete track"); });
       },
     });
   }
@@ -270,6 +275,7 @@ export default function ArtistDashboard() {
       .then((res) => {
         setPlaylists((prev) => [...prev, { ...res.data.playlist, musics: [] }]);
         setShowCreatePlaylist(false);
+        toast.success("Playlist created");
       })
       .catch((err) => {
         setError(err.response?.data?.message || "Failed to create playlist");
@@ -282,6 +288,7 @@ export default function ArtistDashboard() {
       .then((res) => {
         setAlbums((prev) => [{ ...res.data.album, musics: [] }, ...prev]);
         setShowCreateAlbum(false);
+        toast.success("Album created");
       })
       .catch((err) => {
         setError(err.response?.data?.message || "Failed to create album");
@@ -321,8 +328,9 @@ export default function ArtistDashboard() {
               : pl
           )
         );
+        toast.success("Removed from playlist");
       })
-      .catch(() => {});
+      .catch(() => { toast.error("Failed to remove track"); });
   }
 
   function removeFromAlbum(albumId, musicId) {
@@ -336,8 +344,9 @@ export default function ArtistDashboard() {
               : al
           )
         );
+        toast.success("Removed from album");
       })
-      .catch(() => {});
+      .catch(() => { toast.error("Failed to remove track"); });
   }
 
   function deletePlaylist(playlistId) {
@@ -347,8 +356,8 @@ export default function ArtistDashboard() {
       onConfirm: () => {
         axios
           .delete(`${MUSIC_URL}/api/music/user-playlist/${playlistId}`, { withCredentials: true })
-          .then(() => setPlaylists((prev) => prev.filter((pl) => String(pl.id ?? pl._id) !== String(playlistId))))
-          .catch(() => {});
+          .then(() => { setPlaylists((prev) => prev.filter((pl) => String(pl.id ?? pl._id) !== String(playlistId))); toast.success("Playlist deleted"); })
+          .catch(() => { toast.error("Failed to delete playlist"); });
       },
     });
   }
@@ -360,8 +369,8 @@ export default function ArtistDashboard() {
       onConfirm: () => {
         axios
           .delete(`${MUSIC_URL}/api/music/album/${albumId}`, { withCredentials: true })
-          .then(() => setAlbums((prev) => prev.filter((al) => String(al.id ?? al._id) !== String(albumId))))
-          .catch(() => {});
+          .then(() => { setAlbums((prev) => prev.filter((al) => String(al.id ?? al._id) !== String(albumId))); toast.success("Album deleted"); })
+          .catch(() => { toast.error("Failed to delete album"); });
       },
     });
   }
@@ -385,6 +394,7 @@ export default function ArtistDashboard() {
           );
         }
         setRenameTarget(null);
+        toast.success("Renamed successfully");
       })
       .catch((err) => {
         setError(err.response?.data?.message || "Failed to rename");

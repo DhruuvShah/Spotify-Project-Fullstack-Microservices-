@@ -711,9 +711,31 @@
     flex-shrink: 0;
   }
   .ad-tabs::-webkit-scrollbar { display: none; }
-  .ad-tab { white-space: nowrap; flex-shrink: 0; }
+  .ad-tab { white-space: nowrap; flex-shrink: 0; padding: 10px 14px; }
   .ad-analytics-stats { grid-template-columns: 1fr 1fr 1fr; gap: var(--space-3); }
   .ad-stat-value { font-size: 24px; }
+
+  /* Touch: always show action buttons (no hover on mobile) */
+  .ad-action-btn { opacity: 1; min-width: 44px; min-height: 44px; }
+  .pl-song-remove { opacity: 1; min-width: 44px; min-height: 44px; }
+  .track-play-btn { width: 44px; height: 44px; }
+  .pl-add-song-btn { width: 44px; height: 44px; }
+
+  /* Stat cards: 1-col on very small screens */
+  .ad-main { padding: var(--space-4); gap: var(--space-6); }
+  .ad-btn-primary { padding: 10px 14px; font-size: var(--text-xs); }
+}
+
+@media (max-width: 480px) {
+  .ad-analytics-stats { grid-template-columns: 1fr; }
+  .ad-playlist-grid { grid-template-columns: 1fr; }
+  .pl-card-btn { min-height: 44px; }
+}
+
+@media (max-width: 320px) {
+  .ad-track-header,
+  .ad-track-row { grid-template-columns: 24px 1fr 80px; }
+  .ad-tab { padding: 10px 10px; font-size: 12px; }
 }
 
 @media (max-width: 900px) {

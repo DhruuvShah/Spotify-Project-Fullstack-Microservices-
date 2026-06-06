@@ -2,10 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import axios from "axios";
 import { Plus, ListMusic, Check } from "lucide-react";
+import { useToast } from "../context/ToastContext";
 import "./AddToPlaylistBtn.css";
 import { MUSIC_URL } from "../config.js";
 
 export default function AddToPlaylistBtn({ musicId }) {
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
   const [playlists, setPlaylists] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -66,12 +68,13 @@ export default function AddToPlaylistBtn({ musicId }) {
       )
       .then(() => {
         setAddedId(playlistId);
+        toast.success("Added to playlist");
         setTimeout(() => {
           setAddedId(null);
           setOpen(false);
         }, 900);
       })
-      .catch(() => {});
+      .catch(() => { toast.error("Failed to add to playlist"); });
   }
 
   return (

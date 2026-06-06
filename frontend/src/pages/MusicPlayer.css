@@ -390,58 +390,6 @@
   cursor: pointer;
 }
 
-/* ── Speed chips ─────────────────────────────────────────────── */
-.mp-speed-row {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.mp-speed-label {
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-on-surface-variant);
-  opacity: 0.7;
-}
-
-.mp-speed-chips {
-  display: flex;
-  gap: var(--space-2);
-  flex-wrap: wrap;
-}
-
-.mp-speed-chip {
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 9999px;
-  border: 1px solid var(--color-outline-variant);
-  background: transparent;
-  font-family: var(--font-ui);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-semibold);
-  color: var(--color-on-surface-variant);
-  cursor: pointer;
-  transition:
-    background var(--transition-base),
-    border-color var(--transition-base),
-    color var(--transition-base),
-    transform var(--transition-fast);
-}
-.mp-speed-chip:hover {
-  border-color: var(--color-outline);
-  color: var(--color-on-surface);
-  background: var(--color-surface-high);
-}
-.mp-speed-chip:active { transform: scale(0.94); }
-.mp-speed-chip.active {
-  background: var(--color-primary);
-  border-color: var(--color-primary);
-  color: var(--color-on-primary);
-}
-
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
   /* On mobile the bottom player is hidden; account for mobile nav bar (56px) */
@@ -464,7 +412,6 @@
   .mp-play-btn { width: 60px; height: 60px; }
   .mp-play-btn svg { width: 24px; height: 24px; }
   .mp-controls { gap: var(--space-3); }
-  .mp-speed-chips { flex-wrap: wrap; gap: var(--space-1); }
 }
 
 @media (max-width: 360px) {
