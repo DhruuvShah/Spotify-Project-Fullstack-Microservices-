@@ -458,8 +458,31 @@
 .pd-menu-item--danger svg { color: var(--color-error); }
 .pd-menu-item--danger:hover { background: rgba(220, 38, 38, 0.06); }
 
+/* ── Mobile back button (hidden on desktop) ──────────────────── */
+.pd-back-btn {
+  display: none;
+}
+
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
+  .pd-root { padding-bottom: 0; }
+
+  .pd-back-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    background: none;
+    border: none;
+    color: var(--color-on-surface-variant);
+    cursor: pointer;
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-ui);
+    font-size: var(--text-sm);
+    font-weight: var(--weight-semibold);
+    transition: color var(--transition-fast);
+  }
+  .pd-back-btn:hover { color: var(--color-on-surface); }
+
   .pd-hero {
     flex-direction: column;
     align-items: flex-start;

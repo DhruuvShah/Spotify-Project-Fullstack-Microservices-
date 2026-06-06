@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Play, Music } from "lucide-react";
+import { Play, Music, ChevronLeft } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { usePlayer } from "../context/PlayerContext";
 import { useSocket } from "../context/SocketContext";
@@ -108,6 +108,11 @@ export default function ArtistProfile() {
 
   return (
     <div className="ap-root">
+      <button className="ap-back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+        <ChevronLeft width={20} height={20} />
+        <span>Back</span>
+      </button>
+
       {/* ── Banner ── */}
       <div className="ap-banner">
         {bannerImg && (

@@ -500,10 +500,12 @@
 @media (max-width: 768px) {
   .bp-root {
     left: 0;
+    bottom: var(--mobile-nav-h, 56px);
     grid-template-columns: 1fr auto;
     height: 68px;
     padding: 0 var(--space-4);
     gap: var(--space-3);
+    cursor: pointer;
   }
 
   .bp-center      { display: none; }
@@ -519,7 +521,7 @@
     left: 0;
     right: 0;
     width: 100%;
-    bottom: 68px;
+    bottom: calc(var(--mobile-nav-h, 56px) + 68px);
   }
 }
 

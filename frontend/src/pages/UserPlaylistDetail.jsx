@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { Play, Heart, ListMusic, MoreVertical, UserRound, Trash2 } from "lucide-react";
+import { Play, Heart, ListMusic, MoreVertical, UserRound, Trash2, ChevronLeft } from "lucide-react";
 import { usePlayer } from "../context/PlayerContext";
 import { useSocket } from "../context/SocketContext";
 import AddToPlaylistBtn from "../components/AddToPlaylistBtn";
@@ -133,6 +133,11 @@ export default function UserPlaylistDetail() {
 
   return (
     <div className="pd-root">
+      <button className="pd-back-btn" onClick={() => navigate(-1)} aria-label="Go back">
+        <ChevronLeft width={20} height={20} />
+        <span>Back</span>
+      </button>
+
       {/* ── Hero header ── */}
       <div className="pd-hero">
         <PlaylistHeaderCover musics={musics} />

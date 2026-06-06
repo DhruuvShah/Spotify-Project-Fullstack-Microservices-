@@ -19,6 +19,14 @@
   .app-main {
     margin-left: 0;
   }
+
+  /* Safe scroll area: accounts for mobile nav (56px) always, plus mini-player (68px) when playing */
+  .app-scroll {
+    padding-bottom: calc(var(--mobile-nav-h, 56px) + var(--space-6));
+  }
+  body.has-player .app-scroll {
+    padding-bottom: calc(var(--mobile-nav-h, 56px) + 68px + var(--space-4));
+  }
 }
 
 .app-scroll {

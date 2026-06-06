@@ -173,8 +173,8 @@ export default function BottomPlayer() {
       )}
 
       <div className="bp-root">
-        {/* ── Left: cover + info + heart ── */}
-        <div className="bp-track">
+        {/* ── Left: cover + info — whole section navigates to player on mobile ── */}
+        <div className="bp-track" onClick={goToPlayer}>
           <button
             className="bp-cover-btn"
             onClick={goToPlayer}

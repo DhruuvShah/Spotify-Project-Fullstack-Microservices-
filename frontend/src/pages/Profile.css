@@ -5,6 +5,9 @@
   background: var(--color-bg);
   padding-bottom: calc(var(--player-bar-height, 88px) + var(--space-8));
 }
+@media (max-width: 768px) {
+  .pf-root { padding-bottom: 0; }
+}
 
 /* ── Header ──────────────────────────────────────────────────── */
 .pf-header {

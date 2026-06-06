@@ -5,6 +5,9 @@
   background: var(--color-bg);
   padding-bottom: calc(var(--player-bar-height, 88px) + var(--space-8));
 }
+@media (max-width: 768px) {
+  .up-root { padding-bottom: 0; }
+}
 
 .up-main {
   padding: clamp(var(--space-6), 4vw, var(--space-8));
