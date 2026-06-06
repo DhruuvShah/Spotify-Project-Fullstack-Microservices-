@@ -75,7 +75,7 @@ function ScrollableRow({ children, itemCount = 0 }) {
   return (
     <div className="home-scroll-wrap">
       <button
-        className={`hsr-btn${canLeft ? "" : " hsr-btn--hidden"}`}
+        className={`hsr-btn hsr-btn--left${canLeft ? "" : " hsr-btn--hidden"}`}
         onClick={() => scroll(-1)}
         aria-label="Scroll left"
         tabIndex={canLeft ? 0 : -1}
@@ -87,7 +87,7 @@ function ScrollableRow({ children, itemCount = 0 }) {
         {children}
       </div>
       <button
-        className={`hsr-btn${canRight ? "" : " hsr-btn--hidden"}`}
+        className={`hsr-btn hsr-btn--right${canRight ? "" : " hsr-btn--hidden"}`}
         onClick={() => scroll(1)}
         aria-label="Scroll right"
         tabIndex={canRight ? 0 : -1}
