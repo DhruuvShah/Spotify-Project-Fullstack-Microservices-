@@ -64,6 +64,12 @@ export default function TopBar() {
         </button>
       </div>
 
+      {/* LUMINA brand — only rendered on mobile where the sidebar is hidden */}
+      <Link to="/" className="topbar-brand" aria-label="Home">
+        <img src="/lumina.svg" alt="" width={22} height={22} aria-hidden="true" />
+        <span>LUMINA</span>
+      </Link>
+
       {/* Search + user */}
       <div className="topbar-right">
         <Link to="/search" className="topbar-icon-btn" aria-label="Search">

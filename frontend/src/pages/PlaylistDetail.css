@@ -498,7 +498,7 @@
   .pd-track-row .atp-wrap { opacity: 1; }
 
   .pd-table-head,
-  .pd-track-row { grid-template-columns: 36px 1fr 44px 44px; }
+  .pd-track-row { grid-template-columns: 36px 1fr 44px 44px 44px; }
   .pd-th-artist,
   .pd-track-row .pd-track-artist-btn { display: none; }
   .pd-th-dur, .pd-track-duration { display: none; }

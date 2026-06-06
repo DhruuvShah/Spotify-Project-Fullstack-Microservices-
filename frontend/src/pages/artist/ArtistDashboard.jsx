@@ -538,68 +538,52 @@ export default function ArtistDashboard() {
             {playlists.length === 0 ? (
               <p className="ad-empty">No playlists yet. Create your first one!</p>
             ) : (
-              <div className="ad-playlist-grid">
+              <div className="ad-plist">
                 {playlists.map((pl, i) => {
                   const plId = String(pl.id ?? pl._id ?? i);
+                  const musics = pl.musics ?? [];
                   return (
-                    <div key={plId} className="ad-playlist-card">
-                      <PlaylistCover musics={pl.musics ?? []} />
-                      <div className="pl-info">
-                        <div className="pl-info-text">
-                          <span className="pl-title">{pl.title}</span>
-                          <span className="pl-artist">{pl.artist}</span>
-                          <span className="pl-count">
-                            {(pl.musics ?? []).length} {(pl.musics ?? []).length === 1 ? "song" : "songs"}
+                    <div key={plId} className="ad-plist-row">
+                      <div className="ad-plist-header">
+                        <div
+                          className="ad-plist-thumb"
+                          onClick={() => navigate(`/user-playlist/${plId}`)}
+                          title="Open playlist"
+                        >
+                          <PlaylistCover musics={musics} />
+                        </div>
+                        <div
+                          className="ad-plist-info"
+                          onClick={() => navigate(`/user-playlist/${plId}`)}
+                        >
+                          <span className="ad-plist-title">{pl.title}</span>
+                          <span className="ad-plist-meta">
+                            {musics.length} {musics.length === 1 ? "song" : "songs"}
                           </span>
                         </div>
-                        <button
-                          className="pl-add-song-btn"
-                          title="Add song"
-                          onClick={() => setAddSongTarget({ type: "playlist", id: plId, title: pl.title, currentMusics: pl.musics ?? [] })}
-                        >
-                          <PlusIcon />
-                        </button>
-                      </div>
-                      {(pl.musics ?? []).length > 0 && (
-                        <div className="pl-songs">
-                          {pl.musics.map((m, idx) => {
-                            const mId = String(m.id ?? m._id ?? idx);
-                            return (
-                              <div key={mId} className="pl-song-row">
-                                <TrackCover src={m.coverImageUrl} alt={m.title} />
-                                <div className="pl-song-info">
-                                  <span className="pl-song-title">{m.title}</span>
-                                  <span className="pl-song-artist">{m.artist}</span>
-                                </div>
-                                <button
-                                  className="pl-song-play"
-                                  title="Play"
-                                  onClick={(e) => { e.stopPropagation(); playTrack(m, pl.musics); }}
-                                >
-                                  <PlayIcon />
-                                </button>
-                                <button
-                                  className="pl-song-remove"
-                                  title="Remove from playlist"
-                                  onClick={(e) => { e.stopPropagation(); removeFromPlaylist(plId, mId); }}
-                                >
-                                  <XSmallIcon />
-                                </button>
-                              </div>
-                            );
-                          })}
+                        <div className="ad-plist-btns">
+                          <button
+                            className="ad-plist-btn"
+                            title="Add song"
+                            onClick={() => setAddSongTarget({ type: "playlist", id: plId, title: pl.title, currentMusics: musics })}
+                          >
+                            <PlusIcon />
+                          </button>
+                          <button
+                            className="ad-plist-btn"
+                            title="Rename"
+                            onClick={() => setRenameTarget({ type: "playlist", id: plId, currentTitle: pl.title })}
+                          >
+                            <PencilIcon />
+                          </button>
+                          <button
+                            className="ad-plist-btn danger"
+                            title="Delete"
+                            onClick={() => deletePlaylist(plId)}
+                          >
+                            <TrashIcon />
+                          </button>
                         </div>
-                      )}
-                      <div className="pl-card-actions">
-                        <button
-                          className="pl-card-btn"
-                          onClick={() => setRenameTarget({ type: "playlist", id: plId, currentTitle: pl.title })}
-                        >
-                          <PencilIcon /> Rename
-                        </button>
-                        <button className="pl-card-btn danger" onClick={() => deletePlaylist(plId)}>
-                          <TrashIcon /> Delete
-                        </button>
                       </div>
                     </div>
                   );
@@ -625,31 +609,49 @@ export default function ArtistDashboard() {
             {albums.length === 0 ? (
               <p className="ad-empty">No albums yet. Create your first album!</p>
             ) : (
-              <div className="ad-playlist-grid">
+              <div className="ad-plist">
                 {albums.map((al, i) => {
                   const alId = String(al.id ?? al._id ?? i);
+                  const musics = al.musics ?? [];
                   return (
-                    <div key={alId} className="ad-playlist-card">
-                      <PlaylistCover musics={al.musics ?? []} />
-                      <div className="pl-info">
-                        <div className="pl-info-text">
-                          <span className="pl-title">{al.title}</span>
-                          <span className="pl-artist">{al.artist}</span>
-                          <span className="pl-count">
-                            {(al.musics ?? []).length} {(al.musics ?? []).length === 1 ? "song" : "songs"}
+                    <div key={alId} className="ad-plist-row">
+                      <div className="ad-plist-header">
+                        <div className="ad-plist-thumb ad-plist-thumb--static">
+                          <PlaylistCover musics={musics} />
+                        </div>
+                        <div className="ad-plist-info ad-plist-info--static">
+                          <span className="ad-plist-title">{al.title}</span>
+                          <span className="ad-plist-meta">
+                            {musics.length} {musics.length === 1 ? "song" : "songs"}
                           </span>
                         </div>
-                        <button
-                          className="pl-add-song-btn"
-                          title="Add song"
-                          onClick={() => setAddSongTarget({ type: "album", id: alId, title: al.title, currentMusics: al.musics ?? [] })}
-                        >
-                          <PlusIcon />
-                        </button>
+                        <div className="ad-plist-btns">
+                          <button
+                            className="ad-plist-btn"
+                            title="Add song"
+                            onClick={() => setAddSongTarget({ type: "album", id: alId, title: al.title, currentMusics: musics })}
+                          >
+                            <PlusIcon />
+                          </button>
+                          <button
+                            className="ad-plist-btn"
+                            title="Rename"
+                            onClick={() => setRenameTarget({ type: "album", id: alId, currentTitle: al.title })}
+                          >
+                            <PencilIcon />
+                          </button>
+                          <button
+                            className="ad-plist-btn danger"
+                            title="Delete"
+                            onClick={() => deleteAlbum(alId)}
+                          >
+                            <TrashIcon />
+                          </button>
+                        </div>
                       </div>
-                      {(al.musics ?? []).length > 0 && (
+                      {musics.length > 0 && (
                         <div className="pl-songs">
-                          {al.musics.map((m, idx) => {
+                          {musics.map((m, idx) => {
                             const mId = String(m.id ?? m._id ?? idx);
                             return (
                               <div key={mId} className="pl-song-row">
@@ -661,7 +663,7 @@ export default function ArtistDashboard() {
                                 <button
                                   className="pl-song-play"
                                   title="Play"
-                                  onClick={(e) => { e.stopPropagation(); playTrack(m, al.musics); }}
+                                  onClick={(e) => { e.stopPropagation(); playTrack(m, musics); }}
                                 >
                                   <PlayIcon />
                                 </button>
@@ -677,17 +679,6 @@ export default function ArtistDashboard() {
                           })}
                         </div>
                       )}
-                      <div className="pl-card-actions">
-                        <button
-                          className="pl-card-btn"
-                          onClick={() => setRenameTarget({ type: "album", id: alId, currentTitle: al.title })}
-                        >
-                          <PencilIcon /> Rename
-                        </button>
-                        <button className="pl-card-btn danger" onClick={() => deleteAlbum(alId)}>
-                          <TrashIcon /> Delete
-                        </button>
-                      </div>
                     </div>
                   );
                 })}
