@@ -245,7 +245,7 @@ export default function UserPlaylistDetail() {
                   </button>
 
                   {/* Add to playlist */}
-                  <div onClick={(e) => e.stopPropagation()}>
+                  <div className="pd-atp-cell" onClick={(e) => e.stopPropagation()}>
                     <AddToPlaylistBtn musicId={tid} />
                   </div>
 

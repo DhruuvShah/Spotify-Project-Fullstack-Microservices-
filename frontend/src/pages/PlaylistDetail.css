@@ -509,7 +509,7 @@
 
   .pd-table-head,
   .pd-track-row { grid-template-columns: 36px 1fr 44px 44px; }
-  .pd-track-row .atp-wrap { display: none; }
+  .pd-track-row .pd-atp-cell { display: none; }
 
   .pd-actions { gap: var(--space-2); }
   .pd-play-all-btn { height: 42px; padding: 0 var(--space-4); }
