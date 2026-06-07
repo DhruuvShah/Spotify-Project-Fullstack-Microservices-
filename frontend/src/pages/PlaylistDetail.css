@@ -367,24 +367,22 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
-  opacity: 0;
+  opacity: 1;
   transition: opacity var(--transition-base), color var(--transition-base), transform var(--transition-fast);
 }
 .pd-like-btn svg { width: 15px; height: 15px; }
-.pd-track-row:hover .pd-like-btn { opacity: 1; }
 .pd-like-btn.liked { opacity: 1; color: var(--color-primary); }
 .pd-like-btn:hover { transform: scale(1.1); }
 .pd-like-btn:not(.liked):hover { color: var(--color-on-surface); }
 
-/* AddToPlaylistBtn reveal */
+/* AddToPlaylistBtn */
 .pd-track-row .atp-wrap {
-  opacity: 0;
+  opacity: 1;
   transition: opacity var(--transition-base);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.pd-track-row:hover .atp-wrap { opacity: 1; }
 
 /* Context menu per row */
 .pd-menu-wrap {
@@ -405,10 +403,9 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-sm);
-  opacity: 0;
+  opacity: 1;
   transition: opacity var(--transition-base), background var(--transition-base);
 }
-.pd-track-row:hover .pd-menu-btn { opacity: 1; }
 .pd-menu-btn:hover { background: var(--color-surface-high); }
 .pd-menu-btn.active {
   opacity: 1;

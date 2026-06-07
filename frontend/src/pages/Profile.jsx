@@ -103,34 +103,35 @@ export default function Profile() {
       axios.get(`${AUTH_URL}/api/auth/artist/${user.id}`, { withCredentials: true })
         .then((res) => setFollowerCount(res.data.artist.followerCount))
         .catch(() => setFollowerCount(0));
-    } else {
-      setLikedLoading(true);
-      axios.get(`${MUSIC_URL}/api/music/liked-tracks`, { withCredentials: true })
-        .then((res) => setLikedTracks(res.data.musics ?? []))
-        .catch(() => setLikedTracks([]))
-        .finally(() => setLikedLoading(false));
-      axios.get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
-        .then(async (res) => {
-          const basic = res.data.playlists;
-          const detailed = await Promise.all(
-            basic.map(async (pl) => {
-              const id = pl._id ?? pl.id;
-              if (!pl.musics || pl.musics.length === 0) return { ...pl, id, musics: [] };
-              try {
-                const r = await axios.get(`${MUSIC_URL}/api/music/user-playlist/${id}`, { withCredentials: true });
-                return r.data.playlist;
-              } catch {
-                return { ...pl, id, musics: [] };
-              }
-            })
-          );
-          setUserPlaylists(detailed);
-        })
-        .catch(() => setUserPlaylists([]));
-      axios.get(`${AUTH_URL}/api/auth/following`, { withCredentials: true })
-        .then((res) => setFollowedArtists(res.data.artists))
-        .catch(() => setFollowedArtists([]));
     }
+
+    // Liked songs, personal playlists, and following — available to every account, artist or not
+    setLikedLoading(true);
+    axios.get(`${MUSIC_URL}/api/music/liked-tracks`, { withCredentials: true })
+      .then((res) => setLikedTracks(res.data.musics ?? []))
+      .catch(() => setLikedTracks([]))
+      .finally(() => setLikedLoading(false));
+    axios.get(`${MUSIC_URL}/api/music/user-playlists`, { withCredentials: true })
+      .then(async (res) => {
+        const basic = res.data.playlists;
+        const detailed = await Promise.all(
+          basic.map(async (pl) => {
+            const id = pl._id ?? pl.id;
+            if (!pl.musics || pl.musics.length === 0) return { ...pl, id, musics: [] };
+            try {
+              const r = await axios.get(`${MUSIC_URL}/api/music/user-playlist/${id}`, { withCredentials: true });
+              return r.data.playlist;
+            } catch {
+              return { ...pl, id, musics: [] };
+            }
+          })
+        );
+        setUserPlaylists(detailed);
+      })
+      .catch(() => setUserPlaylists([]));
+    axios.get(`${AUTH_URL}/api/auth/following`, { withCredentials: true })
+      .then((res) => setFollowedArtists(res.data.artists))
+      .catch(() => setFollowedArtists([]));
   }, [user]);
 
   async function handleLogout() {
@@ -166,7 +167,7 @@ export default function Profile() {
           <p className="pf-email">{user.email}</p>
 
           <div className="pf-stats-row">
-            {user.role === "artist" ? (
+            {user.role === "artist" && (
               <>
                 <div className="pf-stat-chip">
                   <span className="pf-stat-num">{trackCount ?? "–"}</span>
@@ -181,22 +182,21 @@ export default function Profile() {
                   <span className="pf-stat-label">Playlists</span>
                 </div>
               </>
-            ) : (
-              <>
-                <div className="pf-stat-chip">
-                  <span className="pf-stat-num">{likedLoading ? "–" : likedTracks.length}</span>
-                  <span className="pf-stat-label">Liked</span>
-                </div>
-                <div className="pf-stat-chip">
-                  <span className="pf-stat-num">{likedLoading ? "–" : userPlaylists.length}</span>
-                  <span className="pf-stat-label">Playlists</span>
-                </div>
-                <div className="pf-stat-chip">
-                  <span className="pf-stat-num">{likedLoading ? "–" : followedArtists.length}</span>
-                  <span className="pf-stat-label">Following</span>
-                </div>
-              </>
             )}
+            <div className="pf-stat-chip">
+              <span className="pf-stat-num">{likedLoading ? "–" : likedTracks.length}</span>
+              <span className="pf-stat-label">Liked</span>
+            </div>
+            {user.role !== "artist" && (
+              <div className="pf-stat-chip">
+                <span className="pf-stat-num">{likedLoading ? "–" : userPlaylists.length}</span>
+                <span className="pf-stat-label">Playlists</span>
+              </div>
+            )}
+            <div className="pf-stat-chip">
+              <span className="pf-stat-num">{likedLoading ? "–" : followedArtists.length}</span>
+              <span className="pf-stat-label">Following</span>
+            </div>
           </div>
 
           <div className="pf-actions">
@@ -221,17 +221,24 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* ── Listener content ── */}
-      {user.role !== "artist" && (
+      {/* ── Liked / Playlists / Following content ── */}
+      {(() => {
+        const tabs = user.role === "artist"
+          ? [
+              { key: "liked",     label: "Liked Songs" },
+              { key: "following", label: "Following"   },
+            ]
+          : [
+              { key: "liked",     label: "Liked Songs"  },
+              { key: "playlists", label: "My Playlists" },
+              { key: "following", label: "Following"    },
+            ];
+        return (
         <div className="pf-content">
 
           {/* Tab nav */}
           <nav className="pf-tabs" role="tablist" aria-label="Profile sections">
-            {[
-              { key: "liked",     label: "Liked Songs"  },
-              { key: "playlists", label: "My Playlists" },
-              { key: "following", label: "Following"    },
-            ].map((t) => (
+            {tabs.map((t) => (
               <button
                 key={t.key}
                 role="tab"
@@ -358,7 +365,8 @@ export default function Profile() {
           )}
 
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
