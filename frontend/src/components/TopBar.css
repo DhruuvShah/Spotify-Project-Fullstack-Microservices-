@@ -209,12 +209,11 @@
   color: var(--color-error);
 }
 
-/* ── LUMINA brand — mobile only (desktop sidebar handles branding) ── */
+/* ── LUMINA brand — mobile topbar only (desktop sidebar shows its own) ── */
 .topbar-brand {
   display: none;
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  left: var(--space-4);
   align-items: center;
   gap: 6px;
   text-decoration: none;
@@ -241,6 +240,6 @@
     border-bottom-width: 2px;
   }
 
-  /* Show LUMINA brand centered */
+  /* Show LUMINA brand, left-aligned */
   .topbar-brand { display: flex; }
 }

@@ -318,7 +318,7 @@
 
 @media (max-width: 768px) {
   .toast-container {
-    top: var(--space-3);
+    top: calc(var(--topbar-h) + var(--space-3));
     right: var(--space-3);
     left: var(--space-3);
     max-width: 100%;
